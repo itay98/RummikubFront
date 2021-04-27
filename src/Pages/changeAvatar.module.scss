@@ -1,0 +1,14 @@
+.cont {
+    composes: flex from "../composed.scss";
+}
+.av {
+    composes: bgBlWh avSh from '../composed.scss';
+    width: 16%;
+    margin: 1vw;
+    h5 {
+        margin: 1vw 0;
+    }
+    button {
+        padding: 0.2vw;
+    }
+}

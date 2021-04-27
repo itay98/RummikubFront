@@ -1,0 +1,17 @@
+.table {
+    display: unset;
+}
+.body{
+    composes: bgBlWh from '../composed.scss';
+    font-size: 3vh;
+    tr {
+        border: solid;
+    }
+    td {
+        padding: 1vw;
+    }
+    ul {
+        margin: -1vw 0;
+        padding-inline-start: 4.5vh;
+    }
+}

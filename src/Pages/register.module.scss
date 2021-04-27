@@ -1,0 +1,87 @@
+.cont > div {
+    padding: 10px;
+    &:nth-of-type(4) {
+        background-color: rgba(108, 117, 125, 0.6);
+        display: inline-block;
+        width: 400px;
+        border-radius: 20%;
+    }
+}
+.traits {
+    div {
+        margin: 25px 0;
+    }
+    & + div {
+        margin: -15px 0 10px;
+    }
+    b {
+        font-size: large;
+        margin: 5px;
+    }
+    input {
+        position: relative;
+        margin: 0 -30px 0 20px;
+        cursor: pointer;
+    }
+}
+.colab {
+    composes: avSh from "../composed.scss";
+    padding: 20px;
+    font-size: 16px;
+    line-height: normal;
+    cursor: pointer;
+    &[for="c1"] {
+        background-color: rgb(255, 247, 209);
+    }
+    &[for="c2"] {
+        background-color: rgb(255, 222, 163);
+    }
+    &[for="c3"] {
+        background-color: rgb(245, 206, 143);
+    }
+    &[for="c4"] {
+        background-color: rgb(214, 170, 112);
+    }
+    &[for="c5"] {
+        background-color: rgb(176, 129, 89);
+    }
+}
+.selectedAv {
+    composes: bgBlWh avSh vaMid from "../composed.scss";
+    width: 80px;
+    height: 80px;
+    font-size: 18px;
+    line-height: 2.2;
+}
+.agender {
+    background-color: yellow;
+    padding: 3px 5px;
+    border: 3px solid;
+    border-radius: 10px;
+    cursor: pointer;
+    &.selected,
+    &:hover {
+        color: white;
+    }
+}
+@mixin variant($color) {
+    composes: agender;
+    color: $color;
+    &.selected,
+    &:hover {
+        background-color: $color;
+        border-color: $color;
+    }
+}
+.male {
+    @include variant(blue);
+}
+.female {
+    @include variant(violet);
+}
+.young {
+    @include variant(rgb(166, 113, 78));
+}
+.old {
+    @include variant(rgb(176, 193, 212));
+}

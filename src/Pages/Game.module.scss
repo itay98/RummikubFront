@@ -1,0 +1,47 @@
+.loadGame {
+    padding-top: 30vh;
+}
+.gameEnded {
+    padding-top: 20vh;
+    font-size: 2vw;
+}
+.game {
+    background-color: green;
+    height: 100vh;
+    > div {
+        position: fixed;
+    }
+}
+.timerC {
+    width: 10%;
+    bottom: 20%;
+    right: 8%;
+    font-size: 2vw;
+}
+.finish {
+    composes: bgBlWh from '../composed.scss';
+    width: 6%;
+    bottom: 6%;
+    right: 10%;
+    font-size: 1.7vw;
+    border-radius: 50%;
+    padding: 0.5%;
+    cursor: pointer;
+}
+.sort {
+    composes: bgBlWh from '../composed.scss';
+    width: 4%;
+    height: 8%;
+    left: 12%;
+    line-height: 4vh;
+    border-radius: 15%;
+    cursor: pointer;
+}
+.runSC {
+    composes: sort;
+    bottom: 18%;
+}
+.groupSC {
+    composes: sort;
+    bottom: 4%;
+}

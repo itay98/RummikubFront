@@ -1,0 +1,45 @@
+.pointsC {
+    composes: cards from "../composed.scss";
+}
+.pntC {
+    composes: tC from "../Components/tile.scss";
+    width: 20%;
+    h1 {
+        font-size: 2vw;
+        margin-bottom: 15px;
+    }
+    button {
+        @extend .prize;
+        width: 100px;
+        font-weight: 700;
+        border-width: medium;
+        font-size: large;
+    }
+    b {
+        display: inline-block;
+        margin: 30px;
+    }
+}
+.plyH {
+    font-size: 24px;
+    margin-right: 20px;
+}
+.slot {
+    composes: vaMid from "../composed.scss";
+    width: 3.75vw;
+    height: 13.02vh;
+    margin: 10px;
+}
+.tile {
+    composes: tile from "../Components/tile.scss";
+    cursor: pointer;
+}
+.hidden {
+    opacity: 0;
+}
+.selected {
+    composes: ss from "../Components/spin.module.scss";
+}
+.prize {
+    margin: 20px;
+}

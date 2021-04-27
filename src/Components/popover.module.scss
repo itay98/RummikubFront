@@ -1,0 +1,25 @@
+.pop {
+    composes: bgBlWh from "../composed.scss";
+    max-width: 18%;
+    h6 {
+        padding-bottom: 0;
+        background-color: unset;
+        border-bottom: none;
+        & + div {
+            padding-top: 0.2rem;
+            color: unset;
+        }
+    }
+}
+@mixin arrow($place) {
+    composes: pop;
+    [theme="dark"] & :first-child::after {
+        border-#{$place}-color: black;
+    }
+}
+.text {
+    @include arrow(right);
+}
+.rules {
+    @include arrow(top);
+}

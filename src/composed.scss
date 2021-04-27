@@ -1,0 +1,26 @@
+.bgBlWh {
+  background-color: white;
+  [theme="dark"] & {
+    background-color: black;
+  }
+}
+.flex {
+  display: flex;
+  flex-wrap: wrap;
+}
+.avSh {
+  border-radius: 50% 50% 70% 70%;
+}
+.vaMid {
+  display: inline-block;
+  vertical-align: middle;
+}
+.cards {
+  display: flex;
+  justify-content: space-evenly;
+  margin: 50px;
+  color: #886ce4;
+  h2 {
+    margin-top: 10px;
+  }
+}

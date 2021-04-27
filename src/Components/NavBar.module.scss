@@ -1,0 +1,42 @@
+.cont {
+    > span {
+        background-color: rgba(255, 0, 0, 0.6);
+        border-radius: 20% 50%;
+    }
+    b {
+        font-family: auto;
+        line-height: 0.3;
+        margin-right: -8px;
+        font-size: 30px;
+        color: #61dafb;
+    }
+    i {
+        font-size: 25px;
+        line-height: 0.5;
+        color: #61dafb;
+    }
+    form span {
+        margin-right: 20px;
+    }
+}
+.dd div {
+    padding: 0;
+    min-width: max-content;
+    [theme="light"] & {
+        background-color: black;
+    }
+    a {
+        background-color: #343a40;
+        color: white;
+        display: block;
+        padding: 0.15rem 0.5rem;
+        &:hover {
+            opacity: 0.8;
+            text-decoration: none;
+        }
+        [theme="light"] & {
+            background-color: white;
+            color: black;
+        }
+    }
+}

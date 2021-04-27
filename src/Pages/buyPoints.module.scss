@@ -1,0 +1,27 @@
+.packages {
+    composes: cards from "../composed.scss";
+    align-items: baseline;
+    div {
+        width: 25%;
+        height: 200px;
+        box-sizing: content-box;
+        background-color: #ffc439;
+        cursor: pointer;
+    }
+    h3 {
+        color: #003087;
+    }
+    h2 {
+        color: #009cde;
+    }
+    h5 {
+        color: rgb(0, 188, 0);
+    }
+    & + div div {
+        background-color: #ffc439;
+        border-radius: 20px;
+    }
+}
+.selected {
+    border: 6px dashed;
+}

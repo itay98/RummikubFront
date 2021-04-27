@@ -1,0 +1,110 @@
+.rules {
+    composes: bgBlWh from "../composed.scss";
+    width: 3%;
+    bottom: 26%;
+    left: 5%;
+    cursor: pointer;
+}
+.players {
+    height: 40%;
+    width: 18%;
+    top: 15%;
+    right: 1%;
+}
+.ply {
+    composes: bgBlWh from "../composed.scss";
+    height: 25%;
+    border: 10px solid green;
+    display: flex;
+    justify-content: space-between;
+}
+.myTurn {
+    border-color: magenta;
+}
+.slots {
+    composes: flex from "../composed.scss";
+    width: 60%;
+    left: 20%;
+}
+$rack: rgb(10, 10, 10);
+.rack {
+    composes: slots;
+    background-color: $rack;
+    height: 31%;
+    bottom: 0;
+    align-content: space-around;
+    > div {
+        $rack: lighten($rack, 10%) !global;
+        background-color: $rack;
+        height: 42%;
+    }
+}
+@for $i from 16 through 25 {
+    .rack#{$i*2} > div {
+        width: (100% / $i);
+    }
+}
+.board {
+    composes: slots;
+    height: 62%;
+    top: 3%;
+    align-content: space-between;
+    > div {
+        background-color: lighten(green, 2%);
+    }
+}
+.board64 > div {
+    width: 6.25%;
+    height: 21%;
+}
+.board120 > div {
+    width: 5%;
+    height: 15%;
+}
+.board225 > div {
+    width: 4%;
+    height: 10%;
+}
+.tile {
+    composes: tile from "./tile.scss";
+    .board120 & {
+        line-height: normal;
+        div {
+            font-size: 2vw;
+        }
+    }
+    .board225 & div {
+        display: none;
+    }
+}
+.mine {
+    border: 0.1vw solid $rack;
+    border-top: none;
+    border-bottom-width: 0.3vw;
+}
+.dragged {
+    opacity: 0.5;
+}
+.pool {
+    composes: flex from "../composed.scss";
+    width: 15%;
+    height: 50%;
+    left: 2.5%;
+    top: 5%;
+    flex-direction: column;
+    align-content: flex-start;
+    transform: skew(-5deg) rotate(-5deg);
+}
+@for $i from 4 through 1 {
+    .s#{$i} {
+        box-shadow: inset -#{$i/20}vw -#{$i/10}vw;
+    }
+}
+.stack {
+    composes: tC from "./tile.scss";
+    composes: s4;
+    width: 20%;
+    height: 18%;
+    margin: 1%;
+    color: rgba(black, 0.2);
+}

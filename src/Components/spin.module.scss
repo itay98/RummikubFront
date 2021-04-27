@@ -1,0 +1,18 @@
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+.cont {
+    height: 150px;
+    span {
+        font-family: auto;
+        line-height: 0.82;
+        font-size: 120px;
+        display: inline-block;
+        animation: spin 2s linear infinite;
+    }
+}
+.ss {
+    animation: spin 0.5s;
+}
