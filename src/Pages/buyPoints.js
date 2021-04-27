@@ -16,12 +16,7 @@ export default function Buy() {
     }, []);
     const create = (data, actions) => {
         return actions.order.create({
-            purchase_units: [
-                {
-                    amount: {
-                        value: packs[points],
-                    }
-                }]
+            purchase_units: [ { amount: { value: packs[points] } }]
         });
     }
     const capture = (data, actions) => {

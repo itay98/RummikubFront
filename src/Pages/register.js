@@ -45,16 +45,19 @@ export default function Register() {
                 .catch(e => { console.log(e); setLoad(false); alert('error registering') });
         }
     }, [username, unV, password, pwV, rPwV, email, emV, avatarId]);
-    const getAvatar = useCallback(() => {
+    const getAvatar = useCallback(async () => {
         if (age && gender && color) {
             setAvatar(0);
             setImage('');
-            axios.get('/avatars/nickname?name=' + age + gender + color)
-                .then(({ data: { id, image } }) => {
-                    setAvatar(id);
-                    setImage(image);
-                })
-                .catch(e => { console.log(e); alert('error with avatar') });
+            setLoad(true);
+            try {
+                const { data } = axios.get('/avatars/nickname?name=' + age + gender + color);
+                setAvatar(data.id);
+                setImage(data.image);
+            } catch (error) {
+                console.log(error); alert('error with avatar');
+            }
+            setLoad(false);
         }
     }, [age, gender, color]);
 
@@ -88,7 +91,7 @@ export default function Register() {
                 </div>
             </div>
             <div>
-                <Button variant="success" onClick={getAvatar} disabled={!age || !gender || !color}>Get Avatar</Button>
+                <Button variant="success" onClick={getAvatar} disabled={!age || !gender || !color || load}>Get Avatar</Button>
                 <span> &#8658; </span>
                 <div className={selectedAv}>{image ? <A b={image} /> : 'Selected Avatar'}</div>
             </div>

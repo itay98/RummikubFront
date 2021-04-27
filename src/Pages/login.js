@@ -3,7 +3,7 @@ import { cont } from "./login.module.scss";
 import axios from "../axios";
 import Button from 'react-bootstrap/Button';
 import Spinner from "../Components/spinner";
-import v from "validator";
+import vE from "validator/es/lib/isEmail";
 export default function Login() {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
@@ -27,7 +27,7 @@ export default function Login() {
             .catch(e => { alert('error logging in'); console.log(e) });
     }, [username, password]);
     const sendEmail = useCallback(() => {
-        if (v.isEmail(email)) {
+        if (vE(email)) {
             setLoad(true);
             axios.get('/users/forgot?e=' + email)
                 .then(({ data }) => {

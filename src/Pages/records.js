@@ -13,8 +13,10 @@ export default function Records() {
                 <th>#</th><th>Date</th><th>Duration</th><th>Won?</th><th>Cost</th><th>Prize</th>
             </tr></thead>
             <tbody>
-                {games.map((g, i) => (<tr key={i}><td>{i + 1}</td><td>{new Date(g.createdAt).toLocaleDateString()}</td>
-                    <td>{g.duration}</td><td>{g.winnerId === id ? 'yes' : 'no'}</td><td>{g.pointsLost}</td><td>{g.pointsWon}</td></tr>))}
+                {games.map((g, i) => (<tr key={i}>
+                    <td>{i + 1}</td><td>{new Date(g.createdAt).toLocaleDateString()}</td><td>{g.duration}</td>
+                    <td>{g.winnerId === id ? 'yes' : 'no'}</td><td>{g.pointsLost}</td><td>{g.pointsWon}</td>
+                </tr>))}
             </tbody>
         </table></div>)
 }

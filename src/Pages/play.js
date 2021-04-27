@@ -15,7 +15,6 @@ const pntN = parseInt(localStorage.getItem('pntN')), initPnt = pointOpt.includes
 export default function Play() {
     const [players, setPlayers] = useState(initPly);
     const [points, setPoints] = useState(initPnt);
-    //const [id,setId]=useState(2)<input onChange={e => setId(e.target.value)} />,token=0?+id
     const submit = () => {
         localStorage.setItem('plyN', players);
         localStorage.setItem('pntN', points);
