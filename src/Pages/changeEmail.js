@@ -10,7 +10,7 @@ export default function ChangeEmail() {
     const [load, setLoad] = useState(false);
     const submit = () => {
         if (email && !emV) {
-            axios.put('/users/update', { id, token, email })
+            axios.put('/users', { id, token, email })
                 .then(({ data }) => alert(data))
                 .catch(e => { alert('error updating email'); console.log(e) });
         } else

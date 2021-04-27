@@ -10,7 +10,7 @@ export default function ChangeUsername() {
     const [load, setLoad] = useState(false);
     const submit = () => {
         if (username && !unV) {
-            axios.put('/users/update', { id, token, username })
+            axios.put('/users', { id, token, username })
                 .then(({ data }) => alert(data))
                 .catch(e => { alert('error updating username'); console.log(e) });
         } else

@@ -5,7 +5,7 @@ const id = cred[0].split('=')[1], token = cred[1].split('=')[1];
 export default function Activate() {
     const [msg, setMsg] = useState('');
     useEffect(() => {
-        axios.put('/users/update', { id, token, active: true })
+        axios.put('/users', { id, token, active: true })
             .then(({ data }) => {
                 if (data[0] === 'U') {
                     localStorage.setItem('active', true);

@@ -24,7 +24,7 @@ export default function ChangeAvatar() {
     }, []);
     const submit = () => {
         if (avatarId) {
-            axios.put('/users/update', { id, token, avatarId })
+            axios.put('/users', { id, token, avatarId })
                 .then(({ data }) => alert(data))
                 .catch(e => { alert('error updating avatar'); console.log(e) });
         } else

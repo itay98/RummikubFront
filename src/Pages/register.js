@@ -51,7 +51,7 @@ export default function Register() {
             setImage('');
             setLoad(true);
             try {
-                const { data } = axios.get('/avatars/nickname?name=' + age + gender + color);
+                const { data } = await axios.get('/avatars/nickname?name=' + age + gender + color);
                 setAvatar(data.id);
                 setImage(data.image);
             } catch (error) {
