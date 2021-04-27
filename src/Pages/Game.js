@@ -40,7 +40,11 @@ export default function Game() {
     render(s => !s);
   }, [endTurn]);
   useEffect(() => {
-    socket = socketIOClient("https://react-rummikub.herokuapp.com");
+    socket = socketIOClient("https://react-rummikub.herokuapp.com",{withCredentials: true,
+    extraHeaders: {
+      "my-custom-header": "abcd"
+    }
+  });
     socket.emit("user", id);
     int = setInterval(() => {
       if (--timer === 0) {
