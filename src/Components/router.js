@@ -18,25 +18,29 @@ const ChangeEmail = lazy(() => import('../Pages/changeEmail'));
 const TopWinnings = lazy(() => import('../Pages/topWinnings'));
 const TopBalance = lazy(() => import('../Pages/topBalance'));
 export default function Container() {
-    return (<div className="container mt-3">
+  return (<div className="container mt-3">
     <Suspense fallback={<Spinner />}>
       <Switch>
         <Route exact path="/" component={Home} />
         <Route exact path="/rules" component={Rules} />
-        <Route exact path="/register" component={Register} />
-        <Route exact path="/login" component={Login} />
-        <Route exact path="/play" component={Play} />
-        <Route exact path="/records" component={Records} />
-        <Route exact path="/buy" component={Buy} />
-        <Route exact path="/contact" component={Contact} />
         <Route exact path="/activate" component={Activate} />
         <Route exact path="/password" component={ChangePassword} />
-        <Route exact path="/avatars" component={ChangeAvatar} />
-        <Route exact path="/username" component={ChangeUsername} />
-        <Route exact path="/email" component={ChangeEmail} />
-        <Route exact path="/balance" component={TopBalance} />
-        <Route exact path="/winnings" component={TopWinnings} />
-        <Route component={NotFound} />
+        {localStorage.getItem('token') ? <Switch>
+          <Route exact path="/play" component={Play} />
+          <Route exact path="/records" component={Records} />
+          <Route exact path="/buy" component={Buy} />
+          <Route exact path="/contact" component={Contact} />
+          <Route exact path="/avatars" component={ChangeAvatar} />
+          <Route exact path="/username" component={ChangeUsername} />
+          <Route exact path="/email" component={ChangeEmail} />
+          <Route exact path="/balance" component={TopBalance} />
+          <Route exact path="/winnings" component={TopWinnings} />
+          <Route component={NotFound} />
+        </Switch> : <Switch>
+          <Route exact path="/register" component={Register} />
+          <Route exact path="/login" component={Login} />
+          <Route component={NotFound} />
+        </Switch>}
       </Switch></Suspense>
   </div>)
 }

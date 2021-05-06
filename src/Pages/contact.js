@@ -10,7 +10,7 @@ export default function Contact() {
     const submit = () => {
         axios.post('users/contact', { id, token, sub, body })
             .then(({ data }) => alert(data))
-            .catch(e => { alert('problem '); console.log(e) })
+            .catch(e => { alert('problem with server'); console.log(e) })
     }
     const sChange = useCallback(e => setSub(e.target.value), []);
     const bChange = useCallback(e => setBody(e.target.value), []);
