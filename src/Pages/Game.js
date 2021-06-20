@@ -1,20 +1,81 @@
 import socketIOClient from "socket.io-client";
 import Button from 'react-bootstrap/Button';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, PureComponent } from 'react';
 import axios from "../axios";
-import { Pool, Rules, Players, Slots } from "../Components/game";
 import Spinner from "../Components/spinner";
 import errorS from "../Assets/error.mp3";
 import startS from "../Assets/start.mp3";
 import winS from "../Assets/win.mp3";
 import loseS from "../Assets/lose.mp3";
-import { loadGame, gameEnded, game, timerC, finish, runSC, groupSC } from "./Game.module.scss";
+import { GRPOT } from "../Components/popover";
+import A from "../Components/avatar";
+import s, { stack, tile, game, runS, groupS, dragged, mine } from "./Game.module.scss";
 const id = localStorage.getItem('id'), dErr = new Audio(errorS);
-let socket, me, r, b = Array(64).fill(), pn, timer = 30, int, tRS, tilesRemain, players, balance;
-
+const tilesRack = `.${s.rack.split(' ')[0]} .${mine}`, myTilesBoard = `.${s.board.split(' ')[0]} .${mine}`;
+let socket, me, r, b = Array(64).fill(), pn, timer = 30, int, tRS, tilesRemain, players, balance, an = [];
+const start = (e, part, i) => {
+  e.dataTransfer.setData("prevSlot", part + "S" + i);
+  setTimeout(() => e.target.classList.add(dragged), 10);
+}
+const over = e => e.preventDefault(), end = e => e.target.classList.remove(dragged);
+const addAn = (div, d) => {
+  const { x, y } = div.getBoundingClientRect();
+  an.unshift({ x, y, d });
+}
+class Rules extends PureComponent {
+  render() {
+    return <GRPOT className={s.rules} />
+  }
+}
+class Pool extends PureComponent {
+  render() {
+    const arr = [], { size } = this.props, rem = size % 4;
+    for (let i = 3; i < size; i += 4)
+      arr.push(<div key={i} className={stack}></div>);
+    rem && arr.push(<div key={size} className={stack + ' ' + s['s' + rem]}></div>);
+    return <div className={s.pool}>{arr}</div>
+  }
+}
+class Players extends PureComponent {
+  render() {
+    return (<div className={s.players}>{
+      players.map((p, i) => <div key={i} className={s.ply + (pn === i ? ' ' + s.myTurn : '')}>
+        <div><div><b>player #{i + 1} {me === i && '(you)'}</b></div>
+          <div>{p.username}</div></div><A b={p.image} /></div>)}</div>)
+  }
+}
+class Slot extends PureComponent {
+  render() {
+    const { board, color, num, p, i, d } = this.props;
+    return (<div onDragOver={over} onDrop={e => d(e, i, !num)}>{num &&
+      <div className={`${tile} ${color} ${board ? '' : mine}`} onDragStart={e => start(e, p, i)}
+        onDragEnd={end} draggable>{num}<div>&#9883;</div></div>}</div>)
+  }
+}
+class Board extends PureComponent {
+  render() {
+    const { part, arr, drop } = this.props;
+    return (<div className={s[part] + ' ' + s[part + arr.length]}>{
+      arr.map((val, i) => <Slot {...val} i={i} key={i} p={part} d={drop} />)}</div>)
+  }
+}
+class Rack extends Board {
+  componentDidUpdate() {
+    const len = an.length;
+    if (len) {
+      const divs = document.querySelectorAll(tilesRack), st = divs.length - 1, en = st - len;
+      for (let i = st; i > en; i--) {
+        const div = divs[i], { x, y } = div.getBoundingClientRect(), a = an.shift();
+        div.animate([{ opacity: 0 }, {
+          transform: `translate(calc(${a.x}px - ${x}px), calc(${a.y}px - ${y}px))`, opacity: 1, offset: 0.0001
+        }], { duration: 1500, easing: 'ease-in', fill: 'backwards', delay: a.d });
+      }
+    }
+  }
+}
 export default function Game() {
   const [, render] = useState(false);
-  const [load, setLoad] = useState('Waiting for all Players');
+  const [load, setLoad] = useState('Waiting for all Players');//
   const [leave, setLeave] = useState('you can quit safely in ');
   const [ended, setEnded] = useState('');
   const endTurn = useCallback(() => {
@@ -61,10 +122,27 @@ export default function Game() {
       axios.get('/users?id=' + id + '&a[0]=balance').then(({ data }) => localStorage.setItem('balance', balance = data.balance));
       newTurn(0, tileAmount);
     });
-    socket.on('boardChange', board => { b = board; render(s => !s) });
+    socket.on('boardChange', board => { 
+      b = board; 
+      render(s => !s);
+    });
     socket.on('newTurn', newTurn);
     socket.on('tiles', tiles => {
-      const old = r.filter(t => t), len = old.length + tiles.length;
+      const stacks = document.getElementsByClassName(s.s4), rem = tilesRemain % 4, last = (tilesRemain - rem) / 4;
+      let len = tiles.length;
+      if (stacks.length === last + 1)
+        if (len === 1)
+          addAn(stacks[last], 0);
+        else {
+          const divs = document.querySelectorAll(myTilesBoard);
+          if (divs.length === len - 2) {
+            divs.forEach(addAn);
+            addAn(stacks[last], 1000);
+            addAn(stacks[rem === 1 ? last - 1 : last], 1500);
+          }
+        }
+      const old = r.filter(t => t);
+      len += old.length
       const empties = Array(len < 32 ? 32 - len : len % 2);
       r = old.concat(tiles, ...empties);
     });
@@ -141,23 +219,23 @@ export default function Game() {
     render(s => !s);
   }, []);
 
-  return (ended ? (<div className={gameEnded}>
+  return (ended ? (<div className={s.ended}>
     {ended}<br /><br />
     <Button variant="info" onClick={() => window.location.replace('/play')}>play again</Button>
-  </div>) : load ? (<div className={loadGame}>
+  </div>) : load ? (<div className={s.load}>
     <Spinner />{load}...<br /><br />{leave && (leave !== ' ' ? `${leave}${timer}`
       : <Button variant="danger" onClick={() => socket.emit('leave')}>leave now</Button>)}
   </div>) : (<div className={game}>
-    <Slots part="board" arr={b} drop={bDrop} />
-    <Slots part="rack" arr={r} drop={rDrop} />
-    <Players pn={pn} players={players} me={me} />
+    <Board arr={b} part="board" drop={bDrop} />
     <Pool size={tilesRemain} />
+    <Rack arr={r} part="rack" drop={rDrop} />
+    <Players pn={pn} />
     {int && (<>
-      <div className={`${timerC} ${timer < 10 ? 'red' : 'joker'}`}>You have {timer} seconds</div>
-      <div className={finish} onClick={endTurn}>Finish Turn</div>
+      <div className={`${s.timer} ${timer < 10 ? 'red' : 'joker'}`}>You have {timer} seconds</div>
+      <div className={s.finish} onClick={endTurn}>Finish Turn</div>
     </>)}
-    <div className={runSC} onClick={runSort}>Sort to Runs</div>
-    <div className={groupSC} onClick={groupSort}>Sort to Groups</div>
+    <div className={runS} onClick={runSort}>Sort to Runs</div>
+    <div className={groupS} onClick={groupSort}>Sort to Groups</div>
     <Rules />
   </div>));
 }
