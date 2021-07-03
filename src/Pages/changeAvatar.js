@@ -16,7 +16,7 @@ export default function ChangeAvatar() {
             if (!data) {
                 localStorage.removeItem('token');
                 window.location.replace('/');
-                setTimeout(alert, 10, 'problem with credentials');
+                alert('problem with credentials');
             } else if (data.premAv) {
                 setPaid(true);
                 setAvatar(data.avatarId);

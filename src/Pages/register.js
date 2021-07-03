@@ -40,7 +40,7 @@ export default function Register() {
                     localStorage.setItem('balance', 20);
                     localStorage.setItem('active', '');
                     window.location.replace('/');
-                    setTimeout(alert, 10, 'you successfully registered! Go to your inbox to activate your account');
+                    alert('you successfully registered! Go to your inbox to activate your account');
                 })
                 .catch(e => { console.log(e); setLoad(false); alert('error registering') });
         }

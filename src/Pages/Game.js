@@ -130,7 +130,7 @@ export default function Game() {
       setSGLoad();
       if (reason) {
         goToSettings();
-        setTimeout(alert, 10, reason);
+        alert(reason);
       } else {
         setPlaying(true);
         int = setInterval(() => {

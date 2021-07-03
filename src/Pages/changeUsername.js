@@ -18,7 +18,7 @@ export default function ChangeUsername() {
                         localStorage.setItem('username', username);
                         render(s => !s);
                     }
-                    setTimeout(alert, 10, data);
+                    alert(data);
                 })
                 .catch(e => { alert('error updating username'); console.log(e) });
         } else
