@@ -130,12 +130,11 @@ export default function Game() {
       setSGLoad();
       if (reason) {
         goToSettings();
-        setTimeout(alert, 0, reason);
+        setTimeout(alert, 10, reason);
       } else {
         setLoad('Waiting for all Players');
         setLeave('you can quit safely in ');
         setEnded();
-        setPlaying(true);
         timer = 30;
         int = setInterval(() => {
           if (--timer === 0) {
@@ -214,6 +213,7 @@ export default function Game() {
           const empties = Array(newLen < 32 ? 32 - newLen : newLen % 2);
           r = old.concat(tiles, ...empties);
         });
+        setPlaying(true);
       }
     });
   }, [ply, pnt, endTurn, goToSettings, setPlaying]);
