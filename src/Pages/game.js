@@ -102,8 +102,8 @@ export default function Game() {
   const [, render] = useState();
   const { playing, setPlaying } = useContext(Context);
   const [sGLoad, setSGLoad] = useState();
-  const [load, setLoad] = useState('Waiting for all Players');//
-  const [leave, setLeave] = useState('you can quit safely in ');
+  const [load, setLoad] = useState();
+  const [leave, setLeave] = useState();
   const [ended, setEnded] = useState();
   const [ply, setPly] = useState(initNum('plyOpt'));
   const [pnt, setPnt] = useState(initNum('pntOpt'));
@@ -133,6 +133,9 @@ export default function Game() {
         setTimeout(alert, 0, reason);
       } else {
         setPlaying(true);
+        setLoad('Waiting for all Players');
+        setLeave('you can quit safely in ');
+        setEnded();
         timer = 30;
         int = setInterval(() => {
           if (--timer === 0) {
