@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import axios from "../axios";
-import { cont, traits, young, old, male, female, selected, colab, selectedAv } from "./register.module.scss";
+import { cont, traits, young, old, male, female, selected, rad, colab, selectedAv } from "./register.module.scss";
 import Button from 'react-bootstrap/Button';
 import { Username, Password, Email } from "../Components/textFields";
 import A from "../Components/avatar";
@@ -40,7 +40,7 @@ export default function Register() {
                     localStorage.setItem('balance', 20);
                     localStorage.setItem('active', '');
                     window.location.replace('/');
-                    alert('you successfully registered! Go to your inbox to activate your account');
+                    setTimeout(alert, 10, 'you successfully registered! Go to your inbox to activate your account');
                 })
                 .catch(e => { console.log(e); setLoad(false); alert('error registering') });
         }
@@ -78,15 +78,15 @@ export default function Register() {
                     <b className={`${female} ${gender === 'woman' ? selected : ''}`} onClick={() => setGender('woman')} >female</b>
                 </div>
                 <div><b>Skin-Tone:</b>
-                    <input type="radio" id="c1" checked={color === 1} onChange={() => setColor(1)} />
+                    <input type="radio" id="c1" className={rad} checked={color === 1} onChange={() => setColor(1)} />
                     <label htmlFor="c1" className={colab}>*</label>
-                    <input type="radio" id="c2" checked={color === 2} onChange={() => setColor(2)} />
+                    <input type="radio" id="c2" className={rad} checked={color === 2} onChange={() => setColor(2)} />
                     <label htmlFor="c2" className={colab}>*</label>
-                    <input type="radio" id="c3" checked={color === 3} onChange={() => setColor(3)} />
+                    <input type="radio" id="c3" className={rad} checked={color === 3} onChange={() => setColor(3)} />
                     <label htmlFor="c3" className={colab}>*</label>
-                    <input type="radio" id="c4" checked={color === 4} onChange={() => setColor(4)} />
+                    <input type="radio" id="c4" className={rad} checked={color === 4} onChange={() => setColor(4)} />
                     <label htmlFor="c4" className={colab}>*</label>
-                    <input type="radio" id="c5" checked={color === 5} onChange={() => setColor(5)} />
+                    <input type="radio" id="c5" className={rad} checked={color === 5} onChange={() => setColor(5)} />
                     <label htmlFor="c5" className={colab}>*</label>
                 </div>
             </div>

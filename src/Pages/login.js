@@ -20,7 +20,7 @@ export default function Login() {
                     localStorage.setItem('balance', data.balance);
                     localStorage.setItem('active', data.active || '');
                     window.location.replace('/');
-                    alert('you are logged in');
+                    setTimeout(alert, 10, 'you are logged in');
                 } else
                     alert(data);
             })

@@ -17,7 +17,7 @@ export default function ChangePassword() {
     const [rePassword, setRePassword] = useState(""), [rPwV, setRPwV] = useState("");
     const submit = () => {
         let errTxt = '';
-        if (password === '' || pwV)
+        if (!password || pwV)
             errTxt += "Invalid password\n";
         if (rePassword !== password)
             errTxt += "Invalid retyped password\n";

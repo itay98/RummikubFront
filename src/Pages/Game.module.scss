@@ -21,23 +21,21 @@ $rack: rgb(10, 10, 10);
     font-size: 2vw;
 }
 .finish {
-    composes: bgBlWh from "../composed.scss";
+    composes: bgBlWh pntr from "../composed.scss";
     width: 6%;
     bottom: 6%;
     right: 10%;
     font-size: 1.7vw;
     border-radius: 50%;
     padding: 0.5%;
-    cursor: pointer;
 }
 .sort {
-    composes: bgBlWh from "../composed.scss";
+    composes: bgBlWh pntr from "../composed.scss";
     width: 4%;
     height: 8%;
     left: 12%;
     line-height: 4vh;
     border-radius: 15%;
-    cursor: pointer;
 }
 .runS {
     composes: sort;
@@ -48,11 +46,10 @@ $rack: rgb(10, 10, 10);
     bottom: 4%;
 }
 .rules {
-    composes: bgBlWh from "../composed.scss";
+    composes: bgBlWh pntr from "../composed.scss";
     width: 3%;
     bottom: 26%;
     left: 5%;
-    cursor: pointer;
 }
 .players {
     height: 40%;
@@ -82,8 +79,7 @@ $rack: rgb(10, 10, 10);
     bottom: 0;
     align-content: space-around;
     > div {
-        $rack: lighten($rack, 10%) !global;
-        background-color: $rack;
+        background-color: lighten($rack, 10%);
         height: 42%;
     }
 }
@@ -113,8 +109,21 @@ $rack: rgb(10, 10, 10);
     width: 4%;
     height: 10%;
 }
+%tile {
+    background-color: wheat;
+}
 .tile {
-    composes: tile from "./tile.scss";
+    composes: pntr from "../composed.scss";
+    @extend %tile;
+    width: 100%;
+    height: 100%;
+    font-size: 2vw;
+    font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+    div {
+        color: $game;
+        font-size: 2.5vw;
+        margin-top: -1vh;
+    }
     .board120 & {
         line-height: normal;
         div {
@@ -149,10 +158,66 @@ $rack: rgb(10, 10, 10);
     }
 }
 .stack {
-    composes: tC from "./tile.scss";
     composes: s4;
+    @extend %tile;
     width: 20%;
     height: 18%;
     margin: 1%;
     color: rgba(black, 0.2);
+}
+.black {
+    color: black;
+}
+.red {
+    color: red;
+}
+.orange {
+    color: darkorange;
+}
+.blue {
+    color: blue;
+}
+.joker {
+    color: magenta;
+}
+.points {
+    composes: cards from "../composed.scss";
+    div {
+        @extend %tile;
+        width: 20%;
+    }
+    h1 {
+        font-size: 2vw;
+        margin-bottom: 15px;
+    }
+    button {
+        @extend .prize;
+        width: 100px;
+        font-weight: 700;
+        border-width: medium;
+        font-size: large;
+    }
+    b {
+        display: inline-block;
+        margin: 30px;
+    }
+}
+.numOply {
+    font-size: 24px;
+    margin-right: 20px;
+}
+.slot {
+    composes: vaMid from "../composed.scss";
+    width: 3.75vw;
+    height: 13.02vh;
+    margin: 10px;
+}
+.hidden {
+    opacity: 0;
+}
+.selected {
+    composes: ss from "../Components/spin.module.scss";
+}
+.prize {
+    margin: 20px;
 }

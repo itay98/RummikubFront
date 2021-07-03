@@ -1,54 +1,56 @@
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import { useState, useEffect } from "react";
-import { packages, selected } from "./buyPoints.module.scss";
+import { useState, useEffect, useContext, useCallback } from "react";
+import { Context } from "../App";
+import { packages, pack, selected } from "./buyPoints.module.scss";
 import axios from "../axios";
-const packs = { 100: 1, 550: 5, 1200: 10 }, id = localStorage.getItem('id'), token = localStorage.getItem('token');
+const packs = { 100: { price: 1, low: 'only ' }, 550: { price: 5 }, 1200: { price: 10, high: <h5>BEST value</h5> } };
+let points, ordering;
 export default function Buy() {
-    const [points, setPoints] = useState();
-    useEffect(() => {
-        axios.get(`/users/checkCred?id=${id}&token=${token}`).then(({ data }) => {
-            if (!data) {
-                alert('problem with credentials');
-                localStorage.removeItem('token');
-                window.location.replace('/');
-            }
-        }).catch(e => { console.log(e); alert('problem with server. please try later') });
+    const { render } = useContext(Context);
+    const [, setPoints] = useState();
+    const [id] = useState(localStorage.getItem('id'));
+    const [token] = useState(localStorage.getItem('token'));
+    useEffect(() => axios.get(`/users/checkCred?id=${id}&token=${token}`).then(({ data }) => {
+        if (!data) {
+            alert('problem with credentials');
+            localStorage.removeItem('token');
+            window.location.replace('/');
+        }
+    }).catch(e => {
+        console.log(e);
+        alert('problem with server. please try later')
+    }), [id, token]);
+    const create = useCallback((data, actions) => {
+        ordering = true;
+        return actions.order.create({ purchase_units: [{ amount: { value: packs[points].price } }] });
     }, []);
-    const create = (data, actions) => {
-        return actions.order.create({
-            purchase_units: [ { amount: { value: packs[points] } }]
-        });
+    const cancel = useCallback(() => ordering = false, []);
+    const err = useCallback(e => console.log(cancel(), e.message), [cancel]);
+    const capture = async (data, actions) => {
+        const { status } = await actions.order.capture();
+        if (status === 'COMPLETED')
+            try {
+                const { data } = await axios.post('/users/addPoints', { id, points });
+                localStorage.setItem('balance', data);
+                render(s => !s);
+                setTimeout(alert, 10, `you successfully purchased ${points} points`);
+            } catch (e) {
+                console.log(e); alert('error adding points...contact us')
+            }
+        cancel();
     }
-    const capture = (data, actions) => {
-        return actions.order.capture().then(details => {
-            axios.post('/users/addPoints', { id, points })
-                .then(({ data }) => {
-                    localStorage.setItem('balance', data);
-                    alert(`you successfully purchased ${points} points`);
-                    window.location.reload();
-                })
-                .catch(e => { console.log(e); alert('error adding points...contact us') });
-        });
-    }
-    const pClass = p => points === p ? selected : '';
     return (<div>
         <h3>Choose Points package</h3>
         <div className={packages}>
-            <div className={pClass(100)} onClick={() => setPoints(100)}>
-                <h2>Buy 100&#9883;</h2><hr /><h3>costs only 1$</h3>
-            </div>
-            <div className={pClass(550)} onClick={() => setPoints(550)}>
-                <h2>Buy 550&#9883;</h2><hr /><h3>costs 5$</h3>
-            </div>
-            <div className={pClass(1200)} onClick={() => setPoints(1200)}>
-                <h2>Buy 1200&#9883;</h2><hr /><h3>costs 10$</h3><h5>BEST value</h5>
-            </div>
+            {Object.keys(packs).map(p => (<div key={p} className={`${pack} ${points === p ? selected : ''}`}
+                onClick={() => ordering || setPoints(points = p)}>
+                <h2>Buy {p}&#9883;</h2><hr /><h3>{packs[p].low}costs {packs[p].price}$</h3>{packs[p].high}
+            </div>))}
         </div>
-        {points && <PayPalScriptProvider options={{
+        <PayPalScriptProvider options={{
             "client-id": "AaUFo0jJz5X_1ZM_cTVJ8CXBrVjfD0ukUxj6ppgnlxp8chkIKTHN3EejDJrlBoat85a1Q-6eA1CyXp66"
-        }}>
-            <PayPalButtons createOrder={create} onApprove={capture} onError={e => console.log(e)} forceReRender={points}
-                style={{ color: "blue", shape: "pill", label: "buynow", height: 40 }} />
-        </PayPalScriptProvider>}
+        }}><PayPalButtons createOrder={create} onApprove={capture} onError={err} onCancel={cancel}
+            style={{ color: "blue", shape: "pill", label: "buynow", height: 40 }} />
+        </PayPalScriptProvider>
     </div>)
 }

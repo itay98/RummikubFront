@@ -3,11 +3,10 @@ import vE from "validator/es/lib/isEmail";
 import { TFPOT } from "./popover";
 import { useCallback } from "react";
 import axios from "../axios";
-const reg = /^([a-zA-Z0-9~!@#$]|[-._](?![-._])){4,12}$/;
 export function Username({ getValue, setValue, getValid, setValid, setLoad }) {
     const check = useCallback(async () => {
         let valid = 'invalid';
-        if (reg.test(getValue)) {
+        if (/^([a-zA-Z0-9~!@#$]|[-._](?![-._])){4,12}$/.test(getValue)) {
             setLoad(true);
             try {
                 const { data } = await axios.get('/users/checkUnique?username=' + getValue);

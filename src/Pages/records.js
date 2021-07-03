@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "../axios";
-const id = parseInt(localStorage.getItem('id'));
+const id = +localStorage.getItem('id');
 export default function Records() {
     const [games, setGames] = useState([]);
     useEffect(() => {

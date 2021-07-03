@@ -1,20 +1,18 @@
-import { lazy, Suspense } from "react";
-import { Switch, Route } from "react-router-dom";
+import { useState, createContext } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import NavBar from "./Components/NavBar";
 import Container from "./Components/router";
-import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.scss';
-const Game = lazy(() => import('./Pages/Game'));
-function App() {
-  
+export const Context = createContext();
+export default function App() {
+  const [, render] = useState();
+  const [playing, setPlaying] = useState();
   return (
     <div>
-      <Suspense fallback={<div></div>}> <Switch>
-        <Route exact path="/game" component={Game} />
-        <Route component={() => <><NavBar /><Container /></>} />
-      </Switch></Suspense>
+      <Context.Provider value={{ render, playing, setPlaying }}>
+        <NavBar />
+        <Container />
+      </Context.Provider>
     </div>
   );
 }
-
-export default App;

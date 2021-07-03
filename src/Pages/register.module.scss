@@ -18,18 +18,17 @@
         font-size: large;
         margin: 5px;
     }
-    input {
-        position: relative;
-        margin: 0 -30px 0 20px;
-        cursor: pointer;
-    }
+}
+.rad {
+    composes: pntr from "../composed.scss";
+    position: relative;
+    margin: 0 -30px 0 20px;
 }
 .colab {
-    composes: avSh from "../composed.scss";
+    composes: avSh pntr from "../composed.scss";
     padding: 20px;
     font-size: 16px;
     line-height: normal;
-    cursor: pointer;
     &[for="c1"] {
         background-color: rgb(255, 247, 209);
     }
@@ -54,11 +53,11 @@
     line-height: 2.2;
 }
 .agender {
+    composes: pntr from "../composed.scss";
     background-color: yellow;
     padding: 3px 5px;
     border: 3px solid;
     border-radius: 10px;
-    cursor: pointer;
     &.selected,
     &:hover {
         color: white;

@@ -1,13 +1,17 @@
 .packages {
     composes: cards from "../composed.scss";
     align-items: baseline;
-    div {
-        width: 25%;
-        height: 200px;
-        box-sizing: content-box;
+    & + div div {
         background-color: #ffc439;
-        cursor: pointer;
+        border-radius: 20px;
     }
+}
+.pack {
+    composes: pntr from "../composed.scss";
+    width: 25%;
+    height: 200px;
+    box-sizing: content-box;
+    background-color: #ffc439;
     h3 {
         color: #003087;
     }
@@ -16,10 +20,6 @@
     }
     h5 {
         color: rgb(0, 188, 0);
-    }
-    & + div div {
-        background-color: #ffc439;
-        border-radius: 20px;
     }
 }
 .selected {
