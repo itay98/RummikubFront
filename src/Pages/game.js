@@ -97,7 +97,7 @@ const dErr = new Audio(errorS), initNum = p => {
   const num = +localStorage.getItem(p), arr = Settings[p];
   return arr.includes(num) ? num : arr[0];
 }
-let socket, r, b = Array(64).fill(), timer = 30, int, tRS;
+let socket, r, b = Array(64).fill(), timer, int, tRS;
 export default function Game() {
   const [, render] = useState();
   const { playing, setPlaying } = useContext(Context);
@@ -133,6 +133,7 @@ export default function Game() {
         setTimeout(alert, 0, reason);
       } else {
         setPlaying(true);
+        timer = 30;
         int = setInterval(() => {
           if (--timer === 0) {
             setLeave(' ');
