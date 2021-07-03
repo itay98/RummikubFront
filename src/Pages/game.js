@@ -132,10 +132,10 @@ export default function Game() {
         goToSettings();
         setTimeout(alert, 0, reason);
       } else {
-        setPlaying(true);
         setLoad('Waiting for all Players');
         setLeave('you can quit safely in ');
         setEnded();
+        setPlaying(true);
         timer = 30;
         int = setInterval(() => {
           if (--timer === 0) {
