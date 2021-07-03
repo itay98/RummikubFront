@@ -33,7 +33,7 @@ export default function Buy() {
                 const { data } = await axios.post('/users/addPoints', { id, points });
                 localStorage.setItem('balance', data);
                 render(s => !s);
-                alert(`you successfully purchased ${points} points`);
+                setTimeout(alert, 0, `you successfully purchased ${points} points`);
             } catch (e) {
                 console.log(e); alert('error adding points...contact us')
             }
