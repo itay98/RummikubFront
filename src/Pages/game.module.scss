@@ -113,12 +113,11 @@ $rack: rgb(10, 10, 10);
     background-color: wheat;
 }
 .tile {
-    composes: pntr from "../composed.scss";
+    composes: pntr fontNarrow from "../composed.scss";
     @extend %tile;
     width: 100%;
     height: 100%;
     font-size: 2vw;
-    font-family: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
     div {
         color: $game;
         font-size: 2.5vw;

@@ -6,7 +6,7 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import Navbar from 'react-bootstrap/Navbar';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import { logo, form, dd, hidden } from "./NavBar.module.scss";
+import { logo, atom, form, dd, hidden } from "./NavBar.module.scss";
 import { Link } from "react-router-dom";
 const token = localStorage.getItem('token'), id = localStorage.getItem('id'), active = localStorage.getItem('active');
 const initheme = localStorage.getItem('theme') === 'light' ? 'light' : 'dark';
@@ -27,7 +27,7 @@ export default function Menu() {
     setTheme(newTheme);
   }, []);
   return (<Navbar bg={theme} variant={theme} expand="lg" className={playing && hidden}>
-    <Navbar.Brand className={logo}><b>&#9883;</b><i>R</i>ummikub</Navbar.Brand>
+    <Navbar.Brand className={logo}><b className={atom}>&#9883;</b><i>R</i>ummikub</Navbar.Brand>
     <Navbar.Toggle aria-controls="basic-navbar-nav" />
     <Navbar.Collapse id="basic-navbar-nav">
       <Nav className="mr-auto">

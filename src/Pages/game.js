@@ -116,7 +116,7 @@ export default function Game() {
     }
   }, []);
   const goToSettings = useCallback(() => {
-    socket.close();
+    socket?.close();
     setPlaying();
   }, [setPlaying]);
   const startGame = useCallback(() => {
@@ -217,7 +217,7 @@ export default function Game() {
       }
     });
   }, [ply, pnt, endTurn, goToSettings, setPlaying]);
-  useEffect(() => () => socket?.close(), []);
+  useEffect(() => goToSettings, [goToSettings]);
   const bDrop = useCallback((e, i, clear) => {
     let prevSlot = e.dataTransfer.getData("prevSlot");
     if (prevSlot && clear && int) {
