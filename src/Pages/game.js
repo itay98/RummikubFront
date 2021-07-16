@@ -36,7 +36,7 @@ class Players extends PureComponent {
 class Slot extends PureComponent {
   static over = e => e.preventDefault();
   static draggle = e => e.target.classList.toggle(dragged);
-  static start = (e, part, i) => {
+  static start(e, part, i) {
     e.dataTransfer.setData("prevSlot", part + "S" + i);
     this.draggle(e);
   }
@@ -51,7 +51,7 @@ class Board extends PureComponent {
   render() {
     const { part, arr, drop } = this.props;
     return (<div className={s[part] + ' ' + s[part + arr.length]}>{
-      arr.map((val, i) => <Slot {...val} i={i} key={i} p={part} d={drop} />)}</div>)
+      arr.map((slot, i) => <Slot {...slot} i={i} key={i} p={part} d={drop} />)}</div>)
   }
 }
 class Rack extends Board {
@@ -258,8 +258,7 @@ export default function Game() {
   const runSort = useCallback(() => {
     const sorted = [], colors = { 'black': [], 'orange': [], 'blue': [], 'red': [], 'joker': [] };
     r.forEach(t => t && colors[t.color].push(t));
-    for (const c in colors)
-      sorted.push(...colors[c].sort((a, b) => a.num - b.num));
+    Object.values(colors).forEach(c => sorted.push(...c.sort((a, b) => a.num - b.num)));
     r = sorted.concat(...Array(r.length - sorted.length));
     render(s => !s);
   }, []);
