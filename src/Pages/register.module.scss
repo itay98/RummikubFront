@@ -20,12 +20,12 @@
     }
 }
 .rad {
-    composes: pntr from "../composed.scss";
+    composes: btn from "../composed.scss";
     position: relative;
     margin: 0 -30px 0 20px;
 }
 .colab {
-    composes: avSh pntr from "../composed.scss";
+    composes: avSh btn from "../composed.scss";
     padding: 20px;
     font-size: 16px;
     line-height: normal;
@@ -53,7 +53,7 @@
     line-height: 2.2;
 }
 .agender {
-    composes: pntr from "../composed.scss";
+    composes: btn from "../composed.scss";
     background-color: yellow;
     padding: 3px 5px;
     border: 3px solid;

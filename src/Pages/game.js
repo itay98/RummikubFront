@@ -5,15 +5,14 @@ import { Context } from "../App";
 import Spinner from "../Components/spinner";
 import { GRPOT } from "../Components/popover";
 import A from "../Components/avatar";
-import s, { stack, tile, game, runS, groupS, dragged, mine, joker } from "./game.module.scss";
+import c, { stack, tile, game, runS, groupS, selected, mine, joker } from "./game.module.scss";
 import errorS from "../Assets/error.mp3";
 import startS from "../Assets/start.mp3";
 import winS from "../Assets/win.mp3";
 import loseS from "../Assets/lose.mp3";
-let me, pn, tilesRemain, players, an = [];
 class Rules extends PureComponent {
   render() {
-    return <GRPOT className={s.rules} />
+    return <GRPOT className={c.rules} />
   }
 }
 class Pool extends PureComponent {
@@ -21,50 +20,45 @@ class Pool extends PureComponent {
     const arr = [], rem = tilesRemain % 4;
     for (let i = 3; i < tilesRemain; i += 4)
       arr.push(<div key={i} className={stack}></div>);
-    rem && arr.push(<div key={tilesRemain + 3 - rem} className={stack + ' ' + s['s' + rem]}></div>);
-    return <div className={s.pool}>{arr}</div>
+    rem && arr.push(<div key={tilesRemain + 3 - rem} className={stack + ' ' + c['s' + rem]}></div>);
+    return <div className={c.pool}>{arr}</div>;
   }
 }
 class Players extends PureComponent {
   render() {
-    return (<div className={s.players}>
-      {players.map((p, i) => <div key={i} className={s.ply + (pn === i ? ' ' + s.myTurn : '')}>
+    return (<div className={c.players}>
+      {players.map((p, i) => <div key={i} className={c.ply + (pn === i ? ' ' + c.myTurn : '')}>
         <div><div><b>player #{i + 1} {me === i && '(you)'}</b></div>
-          <div>{p.username}</div></div><A b={p.image} /></div>)}</div>)
+          <div>{p.username}</div></div><A b={p.image} /></div>)}</div>);
   }
 }
 class Slot extends PureComponent {
-  static over = e => e.preventDefault();
-  static draggle = e => e.target.classList.toggle(dragged);
-  static start(e, part, i) {
-    e.dataTransfer.setData("prevSlot", part + "S" + i);
-    this.draggle(e);
-  }
   render() {
-    const { board, color, num, p, i, d } = this.props;
-    return (<div onDragOver={Slot.over} onDrop={e => d(e, i, !num)}>{num &&
-      <div className={`${tile} ${s[color]} ${board ? '' : mine}`} onDragStart={e => Slot.start(e, p, i)}
-        onDragEnd={Slot.draggle} draggable>{num}<div>&#9883;</div></div>}</div>)
+    const { num, color, board, sel, p, i } = this.props;
+    return (<div onClick={() => (num ? select : transfer)(p, i)}>{num &&
+      <div className={`${tile} ${c[color]} ${board ? '' : mine} ${sel ? selected : ''}`}>
+        {num}<div>&#9883;</div></div>}</div>);
   }
 }
 class Board extends PureComponent {
+  part = 'b';
   render() {
-    const { part, arr, drop } = this.props;
-    return (<div className={s[part] + ' ' + s[part + arr.length]}>{
-      arr.map((slot, i) => <Slot {...slot} i={i} key={i} p={part} d={drop} />)}</div>)
+    const { props: { arr }, part } = this;
+    return (<div className={c[part] + ' ' + c[part + arr.length]}>{
+      arr.map((slot, i) => <Slot {...slot} key={i} i={i} p={part} />)}</div>);
   }
 }
 class Rack extends Board {
-  static tilesQuery = `.${s.rack.split(' ')[0]} .${mine}`;
+  part = 'r';
+  static tilesQuery = `.${c.r.split(' ')[0]} .${mine}`;
   componentDidUpdate() {
-    const len = an.length;
+    const len = anim.length;
     if (len) {
       const divs = document.querySelectorAll(Rack.tilesQuery), st = divs.length - 1, en = st - len;
       for (let i = st; i > en; i--) {
-        const div = divs[i], { x, y } = div.getBoundingClientRect(), a = an.shift();
-        div.animate([{ opacity: 0 }, {
-          transform: `translate(calc(${a.x}px - ${x}px), calc(${a.y}px - ${y}px))`, opacity: 1, offset: 0.0001
-        }], { duration: 1500, easing: 'ease-in', fill: 'backwards', delay: a.d });
+        const div = divs[i], { x, y } = div.getBoundingClientRect(), a = anim.shift();
+        div.animate([{ opacity: 0 }, { transform: `translate(${a.x - x}px, ${a.y - y}px)`, opacity: 1, offset: 0.01 }],
+          { duration: 1500, fill: 'backwards', delay: a.d });
       }
     }
   }
@@ -73,31 +67,31 @@ class Settings extends PureComponent {
   static plyOpt = [2, 3, 4];
   static pntOpt = [3, 10, 32, 100];
   static obj = {
-    [this.pntOpt[0]]: { rate: 1, color: s.black, variant: 'dark', name: 'beginner' },
-    [this.pntOpt[1]]: { rate: 0.9, color: s.orange, variant: 'warning', name: 'small' },
-    [this.pntOpt[2]]: { rate: 0.875, color: s.blue, variant: 'primary', name: 'large' },
-    [this.pntOpt[3]]: { rate: 0.85, color: s.red, variant: 'danger', name: 'pro gambler' }
+    [this.pntOpt[0]]: { rate: 1, color: c.black, variant: 'dark', name: 'Beginner' },
+    [this.pntOpt[1]]: { rate: 0.9, color: c.orange, variant: 'warning', name: 'Junior' },
+    [this.pntOpt[2]]: { rate: 0.875, color: c.blue, variant: 'primary', name: 'Senior' },
+    [this.pntOpt[3]]: { rate: 0.85, color: c.red, variant: 'danger', name: 'Master' }
   };
   render() {
     const { ply, pnt, setPnt, setPly } = this.props, { plyOpt, pntOpt, obj } = Settings;
-    return (<><div className={s.points}>
+    return (<><div className={c.points}>
       {pntOpt.map(p => (<div key={p}><h2 className={obj[p].color}>{obj[p].name}</h2>
-        <hr /><h1>{p} &#9883;</h1><h5>{pnt === p ? <b className={joker}>selected</b> :
+        <hr /><h1>{p} &#9883;</h1><h5>{pnt === p ? <i className={c.selectedPnt}>selected</i> :
           <Button variant={obj[p].variant} onClick={() => setPnt(p)}>select</Button>}</h5></div>))}
     </div>
-      <div><b className={s.numOply}>Number of Players:</b>
-        {plyOpt.map(p => (<div key={p} className={s.slot}>
+      <div><b className={c.numOply}>Number of Players:</b>
+        {plyOpt.map(p => (<div key={p} className={c.slot}>
           <div className={tile + ' ' + obj[pnt].color} onClick={() => setPly(p)}>{p}
-            <div className={ply === p ? s.selected : s.hidden}>&#9883;</div></div></div>))}
+            <div className={ply === p ? c.selectedPly : c.hidden}>&#9883;</div></div></div>))}
       </div>
-      <h4 className={s.prize}>winner takes {ply * pnt * obj[pnt].rate} points</h4></>)
+      <h4 className={c.prize}>winner takes {ply * pnt * obj[pnt].rate} points</h4></>);
   }
 }
-const dErr = new Audio(errorS), initNum = p => {
+const err = new Audio(errorS), initNum = p => {
   const num = +localStorage.getItem(p), arr = Settings[p];
   return arr.includes(num) ? num : arr[0];
 }
-let socket, r, b, timer, int, tRS;
+let socket, r, b, timer, int, tRS, me, pn, tilesRemain, players, anim = [], help, select, transfer;
 export default function Game() {
   const [, render] = useState();
   const { playing, setPlaying } = useContext(Context);
@@ -109,8 +103,8 @@ export default function Game() {
   const [pnt, setPnt] = useState(initNum('pntOpt'));
   const endTurn = useCallback(() => {
     if (int) {
-      clearInterval(int);
-      int = undefined;
+      int = clearInterval(int);
+      b = b.filter(t => delete t?.sel);
       socket.emit('turnEnd', b, tRS, r.filter(t => t).length);
       render(s => !s);
     }
@@ -136,6 +130,7 @@ export default function Game() {
         setLeave('you can quit safely in ');
         setEnded();
         timer = 30;
+        help = pnt < 50;
         int = setInterval(() => {
           if (--timer === 0) {
             setLeave(' ');
@@ -144,9 +139,9 @@ export default function Game() {
           render(s => !s);
         }, 1000);
         socket.once("setRack", rack => r = rack);
-        socket.on('boardChange', (board, willRender) => {
+        socket.on('boardChange', (board, willRen) => {
           b = board;
-          willRender || render(s => !s);
+          willRen || render(s => !s);
         });
         socket.on('trim', len => {
           r = r.filter(t => t);
@@ -156,31 +151,30 @@ export default function Game() {
           socket.emit('evalRack', r);
           setLoad('Tiles ended! Checking who won');
         });
-        const newTurn = (pnTurn, tileAmount) => {
-          pn = pnTurn;
-          tilesRemain = tileAmount;
-          if (pn === me) {
-            tRS = r.filter(t => t).length;
-            timer = 30;
-            int = setInterval(() => {
-              if (--timer === 0)
-                endTurn();
-              render(s => !s);
-            }, 1000);
-          }
-          render(s => !s);
-        }
-        socket.on('newTurn', newTurn);
         socket.once('start', (plys, tileAmount) => {
-          clearInterval(int);
+          int = clearInterval(int);
           new Audio(startS).play();
           players = plys;
           me = players.findIndex(p => p.id === id);
           setLoad();
           setLeave();
-          int = undefined;
           localStorage.setItem('balance', players[me].balance - pnt);
+          const newTurn = (pnTurn, tileAmount) => {
+            pn = pnTurn;
+            tilesRemain = tileAmount;
+            if (pn === me) {
+              tRS = r.filter(t => t).length;
+              timer = 30;
+              int = setInterval(() => {
+                if (--timer === 0)
+                  endTurn();
+                render(s => !s);
+              }, 1000);
+            }
+            render(s => !s);
+          };
           newTurn(0, tileAmount);
+          socket.on('newTurn', newTurn);
         });
         socket.once('gameEnd', (winner, prize) => {
           if (id === winner) {
@@ -192,64 +186,71 @@ export default function Game() {
             setEnded('You lost');
           }
         });
-        const myTilesBoard = `.${s.board.split(' ')[0]} .${mine}`, addAn = (div, d) => {
-          const { x, y } = div.getBoundingClientRect();
-          an.unshift({ x, y, d });
-        };
         socket.on('tiles', tiles => {
-          const stacks = document.getElementsByClassName(s.s4), last = Math.ceil(tilesRemain / 4) - 1, len = tiles.length;
-          if (stacks.length === last + 1)
-            if (len === 1)
-              addAn(stacks[last], 0);
-            else {
-              const divs = document.querySelectorAll(myTilesBoard);
-              if (divs.length === len - 2) {
-                divs.forEach(addAn);
-                addAn(stacks[last], 1000);
-                addAn(stacks[tilesRemain % 4 === 1 ? last - 1 : last], 1500);
-              }
-            }
-          const old = r.filter(t => t), newLen = len + old.length;
+          const old = r.filter(t => t), len = tiles.length, newLen = len + old.length;
           const empties = Array(newLen < 32 ? 32 - newLen : newLen % 2);
           r = old.concat(tiles, ...empties);
+          const stacks = document.getElementsByClassName(c.s4), last = Math.ceil(tilesRemain / 4) - 1;
+          const addAnim = (div, d) => {
+            const { x, y } = div.getBoundingClientRect();
+            anim.unshift({ x, y, d });
+          };
+          if (stacks.length === last + 1)
+            if (len === 1)
+              addAnim(stacks[last], 0);
+            else {
+              const divs = document.querySelectorAll(`.${c.b.split(' ')[0]} .${mine}`);
+              if (divs.length === len - 2) {
+                divs.forEach(addAnim);
+                addAnim(stacks[last], 1000);
+                addAnim(stacks[tilesRemain % 4 === 1 ? last - 1 : last], 1500);
+              }
+            }
         });
         setPlaying(true);
       }
     });
   }, [ply, pnt, endTurn, goToSettings, setPlaying]);
-  useEffect(() => goToSettings, [goToSettings]);
-  const bDrop = useCallback((e, i, clear) => {
-    let prevSlot = e.dataTransfer.getData("prevSlot");
-    if (prevSlot && clear && int) {
-      const [prevPart, prevI] = prevSlot.split("S");
-      if (prevPart === 'rack') {
-        b[i] = r.splice(prevI, 1, undefined)[0];
-        r = r.slice();
-      } else
-        b[i] = b.splice(prevI, 1, undefined)[0];
-      b = b.slice();
-      socket.volatile.emit('board', b);
-      render(s => !s);
-    } else
-      dErr.play();
-  }, []);
-  const rDrop = useCallback((e, i, clear) => {
-    let prevSlot = e.dataTransfer.getData("prevSlot");
-    if (prevSlot && clear) {
-      const [prevPart, prevI] = prevSlot.split("S");
-      if (prevPart !== 'rack') {
-        if (b[prevI].board || !int)
-          return dErr.play();
-        r[i] = b.splice(prevI, 1, undefined)[0];
+  useEffect(() => {
+    select = (p, i, arr = r) => {
+      if (p === 'b') {
+        if (!int)
+          return err.play();
+        arr = b;
         b = b.slice();
-        socket.volatile.emit('board', b);
       } else
-        r[i] = r.splice(prevI, 1, undefined)[0];
-      r = r.slice();
+        r = r.slice();
+      arr[i].sel = !arr[i].sel;
       render(s => !s);
-    } else
-      dErr.play();
-  }, []);
+    };
+    transfer = (p, st) => {
+      const getS = arr => arr.map((t, i) => t?.sel && i + '').filter(t => t);
+      const selB = getS(b), selR = getS(r), lB = selB.length, lR = selR.length, len = lB + lR;
+      if (len) {
+        const toB = p === 'b', arr = toB ? b : r, en = st + len;
+        if (en > arr.length)
+          return err.play();
+        for (let i = st; i < en; i++)
+          if (arr[i] && !arr[i].sel)
+            return err.play();
+        if (toB) {
+          if (!int)
+            return err.play();
+        } else if (selB.some(i => b[i].board))
+          return err.play();
+        const del = (s, old) => s.map(i => delete old[i].sel && old.splice(i, 1, undefined)[0]);
+        del(selB, b).concat(del(selR, r)).forEach(t => arr[st++] = t);
+        if (lB || toB) {
+          socket.volatile.emit('board', b);
+          b = b.slice();
+        }
+        if (lR || !toB)
+          r = r.slice();
+        render(s => !s)
+      }
+    };
+    return goToSettings
+  }, [goToSettings]);
   const groupSort = useCallback(() => {
     const tiles = r.filter(t => t).sort((a, b) => a.num === 'J' ? 1 : b.num === 'J' ? -1 : a.num - b.num);
     r = tiles.concat(...Array(r.length - tiles.length));
@@ -263,23 +264,24 @@ export default function Game() {
     render(s => !s);
   }, []);
 
-  return (playing ? ended ? (<div className={s.ended}>
+  return (playing ? ended ? (<div className={c.ended}>
     {ended}<br /><br /><Button variant="info" onClick={goToSettings}>play again</Button>
-  </div>) : load ? (<div className={s.load}>
+  </div>) : load ? (<div className={c.load}>
     <Spinner />{load}...<br /><br />{leave && (leave !== ' ' ? `${leave}${timer}`
       : <Button variant="danger" onClick={() => socket.emit('leave')}>leave now</Button>)}
   </div>) : (<div className={game}>
-    <Board arr={b} part="board" drop={bDrop} />
     <Pool size={tilesRemain} />
-    <Rack arr={r} part="rack" drop={rDrop} />
+    <Board arr={b} /><Rack arr={r} />
     <Players pn={pn} />
     {int && (<>
-      <div className={`${s.timer} ${timer < 10 ? s.red : joker}`}>You have {timer} seconds</div>
-      <div className={s.finish} onClick={endTurn}>Finish Turn</div>
+      <div className={`${c.timer} ${timer < 10 ? c.red : joker}`}>You have {timer} seconds</div>
+      <div className={c.finish} onClick={endTurn}>Finish Turn</div>
     </>)}
-    <div className={runS} onClick={runSort}>Sort to Runs</div>
-    <div className={groupS} onClick={groupSort}>Sort to Groups</div>
-    <Rules />
+    {help && (<>
+      <div className={runS} onClick={runSort}>Sort to Runs</div>
+      <div className={groupS} onClick={groupSort}>Sort to Groups</div>
+      <Rules />
+    </>)}
   </div>) : (<div>
     <h3>Choose Game Settings</h3>
     <Settings ply={ply} pnt={pnt} setPnt={setPnt} setPly={setPly} />

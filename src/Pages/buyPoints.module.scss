@@ -7,7 +7,7 @@
     }
 }
 .pack {
-    composes: pntr from "../composed.scss";
+    composes: btn from "../composed.scss";
     width: 25%;
     height: 200px;
     box-sizing: content-box;

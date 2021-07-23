@@ -4,10 +4,11 @@
     background-color: black;
   }
 }
-.pntr {
+.btn {
   cursor: pointer;
+  user-select: none;
 }
-.flex {
+.flexWrap {
   display: flex;
   flex-wrap: wrap;
 }

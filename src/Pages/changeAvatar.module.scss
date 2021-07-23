@@ -1,5 +1,5 @@
 .cont {
-    composes: flex from "../composed.scss";
+    composes: flexWrap from "../composed.scss";
 }
 .av {
     composes: bgBlWh avSh from '../composed.scss';
