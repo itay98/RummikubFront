@@ -1,11 +1,11 @@
-import { useState, useCallback, useContext } from "react";
+import { useState, useCallback, useContext, useRef } from "react";
 import { useHistory } from "react-router-dom";
 import { Context } from "../App";
 import axios from "../axios";
 import { cont, traits, young, old, male, female, selected, rad, colab, selectedAv } from "./register.module.scss";
 import Button from 'react-bootstrap/Button';
 import { Username, Password, Email } from "../Components/textFields";
-import A from "../Components/avatar";
+import Avatar from "../Components/avatar";
 import Spinner from "../Components/spinner";
 export default function Register() {
     const { render } = useContext(Context), history = useHistory();
@@ -13,9 +13,9 @@ export default function Register() {
     const [password, setPassword] = useState(''), [pwV, setPwV] = useState();
     const [rePassword, setRePassword] = useState(''), [rPwV, setRPwV] = useState();
     const [email, setEmail] = useState(''), [emV, setEmV] = useState();
-    const [avatarId, setAvatar] = useState(), [image, setImage] = useState();
-    const [gender, setGender] = useState(), [age, setAge] = useState();
-    const [color, setColor] = useState(), [load, setLoad] = useState();
+    const avatar = useRef(), [gender, setGender] = useState();
+    const [age, setAge] = useState(), [color, setColor] = useState();
+    const [load, setLoad] = useState();
     const submit = () => {
         let errTxt = "";
         if (!username || unV)
@@ -26,13 +26,13 @@ export default function Register() {
             errTxt += "Invalid retyped password\n";
         if (!email || emV)
             errTxt += "Invalid email address\n";
-        if (!avatarId)
+        if (!avatar.current)
             errTxt += "You must select an avatar";
         if (errTxt)
             alert(errTxt);
         else {
             setLoad(true);
-            axios.post('/users', { username, password, email, avatarId })
+            axios.post('/users', { username, password, email, avatarId: avatar.current.id })
                 .then(({ data: { id, token } }) => {
                     localStorage.setItem('token', token);
                     localStorage.setItem('id', id);
@@ -44,17 +44,15 @@ export default function Register() {
                     render(s => !s);
                 })
                 .catch(e => { console.log(e); setLoad(); setTimeout(alert, 99, 'error registering') });
-       }
+        }
     };
     const getAvatar = useCallback(async () => {
         if (age && gender && color) {
-            setAvatar();
-            setImage();
+            avatar.current = undefined;
             setLoad(true);
             try {
                 const { data } = await axios.get('/avatars/nickname?name=' + age + gender + color);
-                setAvatar(data.id);
-                setImage(data.image);
+                avatar.current = data;
             } catch (error) {
                 console.log(error); setTimeout(alert, 99, 'error with avatar');
             }
@@ -63,11 +61,12 @@ export default function Register() {
     }, [age, gender, color]);
     return (<div className={cont}>
         <h3>Register to this game</h3>
-        <div><Username getValue={username} setValue={setUsername} getValid={unV} setValid={setUnV} setLoad={setLoad} /></div>
-        <div><Password getValue={password} setValue={setPassword} getValid={pwV} setValid={setPwV}
-            getReValue={rePassword} setReValue={setRePassword} getReValid={rPwV} setReValid={setRPwV} /></div>
-        <div><Email getValue={email} setValue={setEmail} getValid={emV} setValid={setEmV} setLoad={setLoad} /></div>
-        <div><h4>Avatar Selection</h4>
+        <section><Username getValue={username} setValue={setUsername} getValid={unV} setValid={setUnV} setLoad={setLoad} />
+        </section>
+        <section><Password getValue={password} setValue={setPassword} getValid={pwV} setValid={setPwV}
+            getReValue={rePassword} setReValue={setRePassword} getReValid={rPwV} setReValid={setRPwV} /></section>
+        <section><Email getValue={email} setValue={setEmail} getValid={emV} setValid={setEmV} setLoad={setLoad} /></section>
+        <section><h4>Avatar Selection</h4>
             <div className={traits}>
                 <div><b>Age:</b>
                     <b className={`${young} ${age === 'young' ? selected : ''}`} onClick={() => setAge('young')} >young</b>
@@ -93,9 +92,9 @@ export default function Register() {
             <div>
                 <Button variant="success" onClick={getAvatar} disabled={!age || !gender || !color || load}>Get Avatar</Button>
                 <span> &#8658; </span>
-                <div className={selectedAv}>{image ? <A b={image} /> : 'Selected Avatar'}</div>
+                <div className={selectedAv}>{avatar.current ? <Avatar a={avatar.current} /> : 'Selected Avatar'}</div>
             </div>
-        </div><br />
+        </section><br />
         {load ? <Spinner /> : <Button onClick={submit}>REGISTER</Button>}
     </div>);
 }

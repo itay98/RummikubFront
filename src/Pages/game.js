@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect, PureComponent, useContext } from 'rea
 import { Context } from "../App";
 import Spinner from "../Components/spinner";
 import { GRPOT } from "../Components/popover";
-import A from "../Components/avatar";
+import Avatar from "../Components/avatar";
 import c, { stack, tile, game, runS, groupS, selected, mine, joker } from "./game.module.scss";
 class Rules extends PureComponent {
   render() {
@@ -30,7 +30,7 @@ class Players extends PureComponent {
     return (<div className={c.players}>
       {v.players.map((p, i) => <div key={i} className={c.ply + (this.props.turn === i ? ' ' + c.myTurn : '')}>
         <div><div><b>player #{i + 1} {v.me === i && '(you)'}</b></div><div>username: {p.username}</div>
-          <div>balance: {p.balance}&#9883;</div></div><A b={p.image} /></div>)}</div>);
+          <div>balance: {p.balance}&#9883;</div></div><Avatar a={p} /></div>)}</div>);
   }
 }
 class Slot extends PureComponent {
@@ -97,7 +97,7 @@ let v = {}, select, transfer;
 export default function Game() {
   const { playing, setPlaying } = useContext(Context);
   const [ply, setPly] = useState(initNum('plyOpt')), [pnt, setPnt] = useState(initNum('pntOpt'));
-  const [load, setLoad] = useState(), [wait, setWait] = useState();
+  const [load, setLoad] = useState(), [wait, setWait] = useState(1);
   const [leave, setLeave] = useState(), [ended, setEnded] = useState();
   const [pool, setPool] = useState(), [turn, setTurn] = useState();
   const [alerr, setAlerr] = useState(), [, render] = useState();
@@ -252,7 +252,7 @@ export default function Game() {
     <b className={c[ended.status]}>You {ended.status}</b>{ended.reason}<br />
     <Button variant="info" onClick={goToSettings}>return</Button>
   </div>) : wait ? (<div className={c.wait}>
-    <Spinner />Waiting for all Players...<br /><br />{leave ? 'you can quit safely in ' + v.timer
+    <b>Waiting for all Players...</b><Spinner />{leave ? 'you can quit safely in ' + v.timer
       : <Button variant="danger" onClick={() => v.timer++ || v.socket.emit('leave')}>leave now</Button>}
   </div>) : (<div className={game}>
     <Players turn={turn} />

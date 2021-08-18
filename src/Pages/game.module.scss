@@ -18,6 +18,12 @@ $joker: #886ce4;
 }
 .wait {
     padding-top: 30vh;
+    b {
+        font-size: 25px;
+    }
+    div {
+        margin: 50px;
+    }
 }
 .ended {
     composes: wait;

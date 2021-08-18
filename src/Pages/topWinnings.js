@@ -11,10 +11,10 @@ export default function TopWinnings() {
             setLoad();
         }).catch(e => { console.log(e); alert('problem with server. please try later') });
     }, []);
-    return (load ? <Spinner /> : (<div><h3>Top Weekly Winnings</h3>
-        <table className={table}><tbody className={body}>
+    return (<div><h3>Top Weekly Winnings</h3>
+        {load ? <Spinner /> : (<table className={table}><tbody className={body}>
             {users.current.map((u, i) => (<tr key={i}><td><b>{i + 1}</b></td>
                 <td><Avatar a={u} /></td><td>{u.username}</td><td>{u.points}&#9883;</td></tr>))}
-        </tbody></table>
-    </div>))
+        </tbody></table>)}
+    </div>)
 }

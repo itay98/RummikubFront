@@ -1,5 +1,5 @@
 .cont {
-    height: 150px;
+    margin-top: 45px;
 }
 @keyframes spin {
     100% {
@@ -8,9 +8,12 @@
 }
 .atom {
     composes: fontNarrow from "../composed.scss";
-    line-height: 0.82;
-    font-size: 120px;
     display: inline-block;
+    line-height: 0;
+    font-size: 120px;
+    padding-bottom: 12px;
+    letter-spacing: -98px;
+    text-indent: -98px;
     animation: spin 2s linear infinite;
 }
 .ss {
