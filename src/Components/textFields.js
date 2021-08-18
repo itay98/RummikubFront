@@ -13,11 +13,11 @@ export function Username({ getValue, setValue, getValid, setValid, setLoad }) {
                 if (data)
                     valid = '';
                 else
-                    alert('that username is already taken');
+                    setTimeout(alert, 99, 'that username is already taken');
             } catch (error) {
-                console.log(error); alert('problem with server');
+                console.log(error); setTimeout(alert, 99, 'problem with server');
             }
-            setLoad(false);
+            setLoad();
         }
         setValid(valid);
     }, [getValue, setValid, setLoad]);
@@ -28,10 +28,7 @@ export function Username({ getValue, setValue, getValid, setValid, setLoad }) {
 }
 export function Password({ getValue, setValue, getValid, setValid, getReValue, setReValue, getReValid, setReValid }) {
     const checkRe = useCallback(() => setReValid(getValue === getReValue ? '' : 'invalid'), [getValue, getReValue, setReValid]);
-    const check = useCallback(() => {
-        setValid(vP(getValue) ? '' : 'invalid');
-        checkRe();
-    }, [getValue, setValid, checkRe]);
+    const check = useCallback(() => checkRe(setValid(vP(getValue) ? '' : 'invalid')), [getValue, setValid, checkRe]);
     const change = useCallback(e => setValue(e.target.value), [setValue]);
     const changeRe = useCallback(e => setReValue(e.target.value), [setReValue]);
     return (<><TFPOT title="Password" content="Must be at least 8 characters and include at least one of each type: lowercase,
@@ -50,11 +47,11 @@ export function Email({ getValue, setValue, getValid, setValid, setLoad }) {
                 if (data)
                     valid = '';
                 else
-                    alert('that email already exists');
+                    setTimeout(alert, 99, 'that email already exists');
             } catch (error) {
-                console.log(error); alert('problem with server');
+                console.log(error); setTimeout(alert, 99, 'problem with server');
             }
-            setLoad(false);
+            setLoad();
         }
         setValid(valid);
     }, [getValue, setValid, setLoad]);

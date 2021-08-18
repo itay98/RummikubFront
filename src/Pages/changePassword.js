@@ -1,20 +1,24 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import axios from "../axios";
 import Button from 'react-bootstrap/Button';
 import { Password } from "../Components/textFields";
 import { cont } from "./changeTF.module.css";
-let cred = window.location.href.split('?')[1], id, token;
-if (cred) {
-    [id, token] = cred.split('&');
-    id = cred[0].split('=')[1];
-    token = cred[1].split('=')[1];
-} else {
-    id = localStorage.getItem('id');
-    token = localStorage.getItem('token');
+const getCred = () => {
+    let cred = window.location.href.split('?')[1], id, token;
+    if (cred) {
+        [id, token] = cred.split('&');
+        id = id.split('=')[1];
+        token = token.split('=')[1];
+    } else {
+        id = localStorage.getItem('id');
+        token = localStorage.getItem('token');
+    }
+    return { id, token };
 }
 export default function ChangePassword() {
-    const [password, setPassword] = useState(""), [pwV, setPwV] = useState("");
-    const [rePassword, setRePassword] = useState(""), [rPwV, setRPwV] = useState("");
+    const [password, setPassword] = useState(""), [pwV, setPwV] = useState();
+    const [rePassword, setRePassword] = useState(""), [rPwV, setRPwV] = useState();
+    const cred = useRef(getCred());
     const submit = () => {
         let errTxt = '';
         if (!password || pwV)
@@ -24,7 +28,7 @@ export default function ChangePassword() {
         if (errTxt)
             alert(errTxt);
         else
-            axios.put('/users/resetPass', { id, token, password })
+            axios.put('/users/resetPass', { ...cred.current, password })
                 .then(({ data }) => alert(data))
                 .catch(e => { console.log(e); alert('error with reseting password') });
     }

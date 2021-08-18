@@ -1,21 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "../axios";
-import A from "../Components/avatar";
+import Avatar from "../Components/avatar";
+import Spinner from "../Components/spinner";
 import { table, body } from "./top.module.scss";
-const id = localStorage.getItem('id');
 export default function TopBalance() {
-    const [users, setUsers] = useState();
+    const users = useRef(), [load, setLoad] = useState(true);
+    const [id] = useState(localStorage.getItem('id'));
     useEffect(() => {
-        axios.get('/users/topBalance?id=' + id).then(({ data }) => { setUsers(data) })
-            .catch(e => { console.log(e); alert('problem with server. please try later') });
-    }, []);
-    return (<div><h3>Top Balance</h3>
-        {users && <table className={table}><tbody className={body}>
-            {users.leaders.map((u, i) => (<tr key={i}><td><b>{i + 1}</b></td><td><A b={u.avatar.image} /></td>
-                <td>{u.username}</td><td>{u.balance}&#9883;</td></tr>))}
-            {users.rank && <><tr><td><ul><li> </li><li> </li><li> </li></ul></td></tr>
-                <tr><td><b>{users.rank}</b></td><td><A b={users.image} /></td>
-                    <td>{users.username}</td><td>{users.balance}&#9883;</td></tr></>}
-        </tbody></table>}
-    </div>)
+        axios.get('/users/topBalance?id=' + id).then(({ data }) => {
+            users.current = data;
+            setLoad();
+        }).catch(e => { console.log(e); alert('problem with server. please try later') });
+    }, [id]);
+    const row = (u, i) => (<tr key={i}><td><b>{i + 1}</b></td><td><Avatar a={u.avatar} />
+    </td><td>{u.username}</td><td>{u.balance}&#9883;</td></tr>);
+    return (load ? <Spinner /> : (<div><h3>Top Balance</h3>
+        <table className={table}><tbody className={body}>
+            {users.current.leaders.map(row)}
+            {users.current.me && <><tr><td><ul><li> </li><li> </li><li> </li></ul></td></tr>
+                {row(users.current.me, users.current.rank)}</>}
+        </tbody></table>
+    </div>))
 }

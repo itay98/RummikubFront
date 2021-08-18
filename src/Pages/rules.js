@@ -2,7 +2,7 @@ import { cont } from "./rules.module.scss";
 export default function Rules() {
     return <div className={cont}><h3>How to Play</h3>
         <p><u>Settings</u> the game can be played between 2 to 4 players. Choose how many will play and the amount of points at
-            stake. With the Master point amount you get no help (rules and sorting buttons are unavailable).</p>
+            stake. With the Master point amount you get no help (rules and sorting buttons and error alerts).</p>
         <p><b><u>Objective:</u></b> be the first player to empty your rack by forming sets with your tiles.</p>
         <p><u>Sets:</u> sets on the board must be placed together on the same line with no spaces between the tiles, left to right
             ordered. You may use the buttons 'Sort to Groups' and 'Sort to Runs' to help you find sets on your rack.<br />
@@ -14,8 +14,8 @@ export default function Rules() {
             Each tile is worth the number shown on it. When the pool empties the game ends, each rack is evaluated by the sum of
             the tiles remain (joker counts as 30) and the player with the lowest sum is the winner.</p>
         <p><u>Slots:</u> tiles are placed inside board or rack slots (the lighter colored area). In order to Move tiles you select
-            them and then click a slot with enough space to it's left. Click each tile to select it and again to deselect. Every
-            time you try to make an invalid move an error sound will be played.</p>
+            them and then click the starting position slot. Click each tile to select it and again to deselect. When you make an
+            error you get an alert, click it to dismiss.</p>
         <p><u>The board:</u> a common place for any player to create and manipulate sets. When it isn't your turn you aren't
             allowed to change the board and you can only watch the changes others make to it. When it gets too full of tiles more
             empty slots are added and every tile appears smaller.</p>

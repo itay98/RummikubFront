@@ -26,6 +26,9 @@ input[placeholder] {
   padding: 15px;
   margin: 10px;
 }
+.hidden {
+    display: none;
+}
 .invalid:not(:focus) {
   border-color: red;
   color: red;

@@ -2,11 +2,9 @@ import axios from "../axios";
 import { useState, useCallback } from "react";
 import { t } from "./contact.module.scss";
 import Button from 'react-bootstrap/Button';
-const token = localStorage.getItem('token'), id = localStorage.getItem('id');
-
 export default function Contact() {
-    const [sub, setSub] = useState('');
-    const [body, setBody] = useState('');
+    const [sub, setSub] = useState(''), [token] = useState(localStorage.getItem('token'));
+    const [body, setBody] = useState(''), [id] = useState(localStorage.getItem('id'));
     const submit = () => {
         axios.post('users/contact', { id, token, sub, body })
             .then(({ data }) => alert(data))

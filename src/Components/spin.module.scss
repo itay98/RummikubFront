@@ -1,10 +1,10 @@
+.cont {
+    height: 150px;
+}
 @keyframes spin {
     100% {
         transform: rotate(360deg);
     }
-}
-.cont {
-    height: 150px;
 }
 .atom {
     composes: fontNarrow from "../composed.scss";

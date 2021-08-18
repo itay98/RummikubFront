@@ -1,11 +1,11 @@
-@keyframes appear {
-  from {
-    opacity: 0;
-    transform: scale(1.1) translateY(5vh);
-  }
-}
 .cont {
   text-align: left;
+  @keyframes appear {
+    from {
+      opacity: 0;
+      transform: scale(1.1) translateY(5vh);
+    }
+  }
   animation: appear 1s linear;
   u {
     font-weight: 600;

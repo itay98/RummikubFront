@@ -1,4 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useContext } from "react";
+import { useHistory } from "react-router-dom";
+import { Context } from "../App";
 import axios from "../axios";
 import { cont, traits, young, old, male, female, selected, rad, colab, selectedAv } from "./register.module.scss";
 import Button from 'react-bootstrap/Button';
@@ -6,17 +8,15 @@ import { Username, Password, Email } from "../Components/textFields";
 import A from "../Components/avatar";
 import Spinner from "../Components/spinner";
 export default function Register() {
-    const [username, setUsername] = useState(""), [unV, setUnV] = useState("");
-    const [password, setPassword] = useState(""), [pwV, setPwV] = useState("");
-    const [rePassword, setRePassword] = useState(""), [rPwV, setRPwV] = useState("");
-    const [email, setEmail] = useState(""), [emV, setEmV] = useState("");
-    const [gender, setGender] = useState("");
-    const [age, setAge] = useState("");
-    const [color, setColor] = useState(0);
-    const [image, setImage] = useState("");
-    const [avatarId, setAvatar] = useState(0);
-    const [load, setLoad] = useState(false);
-    const submit = useCallback(() => {
+    const { render } = useContext(Context), history = useHistory();
+    const [username, setUsername] = useState(''), [unV, setUnV] = useState();
+    const [password, setPassword] = useState(''), [pwV, setPwV] = useState();
+    const [rePassword, setRePassword] = useState(''), [rPwV, setRPwV] = useState();
+    const [email, setEmail] = useState(''), [emV, setEmV] = useState();
+    const [avatarId, setAvatar] = useState(), [image, setImage] = useState();
+    const [gender, setGender] = useState(), [age, setAge] = useState();
+    const [color, setColor] = useState(), [load, setLoad] = useState();
+    const submit = () => {
         let errTxt = "";
         if (!username || unV)
             errTxt += "Invalid username\n";
@@ -39,28 +39,28 @@ export default function Register() {
                     localStorage.setItem('username', username);
                     localStorage.setItem('balance', 20);
                     localStorage.setItem('active', '');
-                    window.location.replace('/');
-                    alert('you successfully registered! Go to your inbox to activate your account');
+                    history.replace('/');
+                    setTimeout(alert, 99, 'you successfully registered! Go to your email to activate your account');
+                    render(s => !s);
                 })
-                .catch(e => { console.log(e); setLoad(false); alert('error registering') });
-        }
-    }, [username, unV, password, pwV, rPwV, email, emV, avatarId]);
+                .catch(e => { console.log(e); setLoad(); setTimeout(alert, 99, 'error registering') });
+       }
+    };
     const getAvatar = useCallback(async () => {
         if (age && gender && color) {
-            setAvatar(0);
-            setImage('');
+            setAvatar();
+            setImage();
             setLoad(true);
             try {
                 const { data } = await axios.get('/avatars/nickname?name=' + age + gender + color);
                 setAvatar(data.id);
                 setImage(data.image);
             } catch (error) {
-                console.log(error); alert('error with avatar');
+                console.log(error); setTimeout(alert, 99, 'error with avatar');
             }
-            setLoad(false);
+            setLoad();
         }
     }, [age, gender, color]);
-
     return (<div className={cont}>
         <h3>Register to this game</h3>
         <div><Username getValue={username} setValue={setUsername} getValid={unV} setValid={setUnV} setLoad={setLoad} /></div>

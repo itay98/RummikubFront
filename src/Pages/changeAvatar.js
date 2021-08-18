@@ -2,28 +2,25 @@ import Button from 'react-bootstrap/Button';
 import { useState, useEffect, useCallback, useRef } from "react";
 import axios from "../axios";
 import Spinner from "../Components/spinner";
-import A from "../Components/avatar";
+import Avatar from "../Components/avatar";
 import { cont, av } from "./changeAvatar.module.scss";
-const id = localStorage.getItem('id'), token = localStorage.getItem('token');
 export default function ChangeAvatar() {
-    const [avatars, setAvatars] = useState([]);
-    const [paid, setPaid] = useState(false);
+    const avatars = useRef(), [avatarId, setAvatar] = useState();
+    const [paid, setPaid] = useState(), [token] = useState(localStorage.getItem('token'));
+    const [lock, setLock] = useState(), [id] = useState(localStorage.getItem('id'));
     const [load, setLoad] = useState(true);
-    const lock = useRef(false);
-    const [avatarId, setAvatar] = useState(0);
     useEffect(() => {
         axios.get(`/users?id=${id}&a[0]=premAv&a[1]=avatarId`).then(({ data }) => {
-            if (!data) {
-                localStorage.removeItem('token');
-                window.location.replace('/');
-                alert('problem with credentials');
-            } else if (data.premAv) {
+            if (data?.premAv) {
                 setPaid(true);
                 setAvatar(data.avatarId);
             }
         });
-        axios.get('/avatars/premAv').then(({ data }) => setLoad(setAvatars(data)));
-    }, []);
+        axios.get('/avatars/premAv').then(({ data }) => {
+            avatars.current = data;
+            setLoad()
+        });
+    }, [id]);
     const submit = () => {
         if (avatarId) {
             axios.put('/users', { id, token, avatarId })
@@ -33,25 +30,24 @@ export default function ChangeAvatar() {
             alert('no avatar selected');
     }
     const unlock = useCallback(async () => {
-        if (!lock.current) {
-            lock.current = true;
-            try {
-                const { data } = await axios.post('/users/unlockPremAv', { id, token });
-                data ? alert(data) : setPaid(true);
-            } catch (error) {
-                alert('error unlocking avatars'); console.log(error)
-            }
-            lock.current = false;
+        setLock(true);
+        try {
+            const { data } = await axios.post('/users/unlockPremAv', { id, token });
+            data ? setTimeout(alert, 99, data) : setPaid(true);
+        } catch (error) {
+            setTimeout(alert, 99, 'error unlocking avatars'); console.log(error)
         }
-    }, []);
+        setLock();
+    }, [id, token]);
     return (load ? <Spinner /> : (<div>
         <h3>Choose an Avatar</h3>
         <div className={cont}>
-            {avatars.map(a => (<div key={a.id} className={av}><h5>{a.nickname}</h5><A b={a.image} /><br /><h5>{avatarId === a.id
-                ? 'selected' : <Button onClick={() => paid && setAvatar(a.id)} variant="success">select</Button>}</h5></div>))}
+            {avatars.current.map(a => (<div key={a.id} className={av}>
+                <h5>{a.nickname}</h5><Avatar a={a} /><br /><h5>{avatarId === a.id ? 'selected' :
+                    <Button onClick={() => paid && setAvatar(a.id)} variant="success">select</Button>}</h5></div>))}
         </div>
         {!paid && <div><h4>Pay 50&#9883; to unlock</h4>
-            <Button variant="info" onClick={unlock}>unlock</Button></div>}
+            {lock ? <Spinner /> : <Button variant="info" onClick={unlock}>unlock</Button>}</div>}
         <Button disabled={!paid} onClick={submit}>Change Avatar</Button>
     </div>))
 }

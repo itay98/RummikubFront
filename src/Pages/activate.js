@@ -9,8 +9,7 @@ export default function Activate() {
             .then(({ data }) => {
                 if (data[0] === 'U') {
                     localStorage.setItem('active', true);
-                    window.location.replace('/');
-                    setTimeout(alert, 10, 'account activated successfully');
+                    setMsg('account activated successfully');
                 } else
                     setMsg(data);
             })

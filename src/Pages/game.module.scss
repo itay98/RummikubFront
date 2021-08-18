@@ -1,11 +1,59 @@
 $game: green;
 $rack: rgb(10, 10, 10);
-.load {
+$joker: #886ce4;
+.joker {
+    color: $joker;
+}
+.black {
+    color: black;
+}
+.red {
+    color: red;
+}
+.orange {
+    color: darkorange;
+}
+.blue {
+    color: blue;
+}
+.wait {
     padding-top: 30vh;
 }
 .ended {
-    padding-top: 20vh;
-    font-size: 2vw;
+    composes: wait;
+    font-size: 1.8vw;
+    b {
+        font-size: 8vh;
+        position: fixed;
+        left: 25%;
+        transform: translateY(-12vh);
+        width: 50%;
+    }
+    button {
+        font-size: 1.2vw;
+        margin-top: 3vh;
+    }
+}
+.WON {
+    text-shadow: 0 0 5vh $joker, 0 0 5vh $joker;
+    @keyframes desc {
+        from {
+            transform: translateY(-40vh) scale(0.8);
+        }
+    }
+    animation: desc 2.5s linear;
+}
+.lost {
+    text-shadow: 0 0 5vh red, 0 0 5vh red;
+    @keyframes dance {
+        0% {
+            transform: translateY(-30vh) scale(0.8);
+        }
+        60% {
+            transform: translateY(-10vh) rotateX(90deg);
+        }
+    }
+    animation: dance 2.5s linear;
 }
 .game {
     background-color: $game;
@@ -15,10 +63,21 @@ $rack: rgb(10, 10, 10);
     }
 }
 .timer {
-    width: 10%;
+    width: 11%;
     bottom: 20%;
-    right: 8%;
+    right: 7.5%;
     font-size: 2vw;
+    font-weight: 700;
+    text-shadow: 0 0 0.3vw black;
+    @keyframes turnStart {
+        0% {
+            transform: translate(-37vw, -30vh) scale(1.5);
+        }
+        50% {
+            transform: translate(-37vw, -30vh) scale(2);
+        }
+    }
+    animation: turnStart 2s;
 }
 .finish {
     composes: bgBlWh btn from "../composed.scss";
@@ -33,7 +92,7 @@ $rack: rgb(10, 10, 10);
     composes: bgBlWh btn from "../composed.scss";
     width: 4%;
     height: 8%;
-    left: 12%;
+    left: 14%;
     line-height: 4vh;
     border-radius: 15%;
 }
@@ -48,24 +107,39 @@ $rack: rgb(10, 10, 10);
 .rules {
     composes: bgBlWh btn from "../composed.scss";
     width: 3%;
-    bottom: 26%;
-    left: 5%;
+    bottom: 23%;
+    left: 6%;
+}
+.alerr {
+    composes: bgBlWh btn from "../composed.scss";
+    composes: red;
+    max-width: 20%;
+    font-size: 1.5vw;
+    top: 40%;
+    left: 40%;
+    border: 0.2vw dashed;
+    border-radius: 1vw;
+    text-shadow: 0 0 0.05vw black;
 }
 .players {
-    height: 40%;
+    height: 56%;
     width: 18%;
-    top: 15%;
+    top: 5%;
     right: 1%;
+    text-align: left;
+    line-height: 1.6;
 }
 .ply {
     composes: bgBlWh from "../composed.scss";
     height: 25%;
-    border: 10px solid $game;
+    border: 1vh solid $game;
+    border-radius: 4vh 9vh 9vh 4vh;
+    padding: 0.6vw;
     display: flex;
     justify-content: space-between;
 }
 .myTurn {
-    border-color: magenta;
+    border-color: $joker;
 }
 .slots {
     composes: flexWrap from "../composed.scss";
@@ -111,6 +185,7 @@ $rack: rgb(10, 10, 10);
 }
 %tile {
     background-color: wheat;
+    border-radius: 6%;
 }
 .tile {
     composes: btn fontNarrow from "../composed.scss";
@@ -140,45 +215,32 @@ $rack: rgb(10, 10, 10);
     border-bottom-width: 0.3vw;
 }
 .selected {
-    background-color: darken(wheat, 8%);
+    background-color: darken(wheat, 7%);
 }
 .pool {
     composes: flexWrap from "../composed.scss";
-    width: 15%;
-    height: 50%;
-    left: 2.5%;
+    width: 16%;
+    height: 60%;
+    left: 2%;
     top: 5%;
     flex-direction: column;
     align-content: flex-start;
-    transform: skew(-5deg) rotate(-5deg);
 }
 @for $i from 4 through 1 {
     .s#{$i} {
-        box-shadow: inset -#{$i/20}vw -#{$i/10}vw;
+        $len: -$i * 0.15vw;
+        box-shadow: inset $len / 2 $len, inset ($len + 0.6vw) / 2 $len + 0.6vw $game;
     }
 }
 .stack {
     composes: s4;
     @extend %tile;
-    width: 20%;
+    width: 22%;
     height: 18%;
     margin: 1%;
-    color: rgba(black, 0.2);
-}
-.black {
-    color: black;
-}
-.red {
-    color: red;
-}
-.orange {
-    color: darkorange;
-}
-.blue {
-    color: blue;
-}
-.joker {
-    color: magenta;
+    color: rgba(black, 0.17);
+    border-top-right-radius: 18%;
+    border-bottom-left-radius: 20%;
 }
 .points {
     composes: cards from "../composed.scss";
@@ -197,7 +259,6 @@ $rack: rgb(10, 10, 10);
     }
 }
 .selectedPnt {
-    composes: joker;
     display: inline-block;
     font-size: x-large;
     margin: 30px;
@@ -211,9 +272,6 @@ $rack: rgb(10, 10, 10);
     width: 3.75vw;
     height: 13.02vh;
     margin: 10px;
-}
-.hidden {
-    opacity: 0;
 }
 .selectedPly {
     composes: ss from "../Components/spin.module.scss";

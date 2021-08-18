@@ -6,30 +6,31 @@ import Spinner from "../Components/spinner";
 import { GRPOT } from "../Components/popover";
 import A from "../Components/avatar";
 import c, { stack, tile, game, runS, groupS, selected, mine, joker } from "./game.module.scss";
-import errorS from "../Assets/error.mp3";
-import startS from "../Assets/start.mp3";
-import winS from "../Assets/win.mp3";
-import loseS from "../Assets/lose.mp3";
 class Rules extends PureComponent {
   render() {
     return <GRPOT className={c.rules} />
   }
 }
 class Pool extends PureComponent {
+  componentDidMount() {
+    const stacks = document.querySelectorAll('.' + c.s4), del = 1500 / stacks.length;
+    stacks.forEach((s, i) => s.animate({ transform: 'translateY(95vh)', offset: 0 },
+      { duration: 500, delay: i * del, fill: 'backwards' }));
+  }
   render() {
-    const arr = [], rem = tilesRemain % 4;
-    for (let i = 3; i < tilesRemain; i += 4)
+    let arr = [], { size } = this.props, rem = size % 4;
+    for (let i = 3; i < size; i += 4)
       arr.push(<div key={i} className={stack}></div>);
-    rem && arr.push(<div key={tilesRemain + 3 - rem} className={stack + ' ' + c['s' + rem]}></div>);
+    rem && arr.push(<div key={size + 3 - rem} className={stack + ' ' + c['s' + rem]}></div>);
     return <div className={c.pool}>{arr}</div>;
   }
 }
 class Players extends PureComponent {
   render() {
     return (<div className={c.players}>
-      {players.map((p, i) => <div key={i} className={c.ply + (pn === i ? ' ' + c.myTurn : '')}>
-        <div><div><b>player #{i + 1} {me === i && '(you)'}</b></div>
-          <div>{p.username}</div></div><A b={p.image} /></div>)}</div>);
+      {v.players.map((p, i) => <div key={i} className={c.ply + (this.props.turn === i ? ' ' + c.myTurn : '')}>
+        <div><div><b>player #{i + 1} {v.me === i && '(you)'}</b></div><div>username: {p.username}</div>
+          <div>balance: {p.balance}&#9883;</div></div><A b={p.image} /></div>)}</div>);
   }
 }
 class Slot extends PureComponent {
@@ -43,22 +44,23 @@ class Slot extends PureComponent {
 class Board extends PureComponent {
   part = 'b';
   render() {
-    const { props: { arr }, part } = this;
+    const { part } = this, arr = v[part];
     return (<div className={c[part] + ' ' + c[part + arr.length]}>{
-      arr.map((slot, i) => <Slot {...slot} key={i} i={i} p={part} />)}</div>);
+      arr.map((t, i) => <Slot {...t} key={i} i={i} p={part} />)}</div>);
   }
 }
 class Rack extends Board {
   part = 'r';
-  static tilesQuery = `.${c.r.split(' ')[0]} .${mine}`;
-  componentDidUpdate() {
-    const len = anim.length;
-    if (len) {
-      const divs = document.querySelectorAll(Rack.tilesQuery), st = divs.length - 1, en = st - len;
-      for (let i = st; i > en; i--) {
-        const div = divs[i], { x, y } = div.getBoundingClientRect(), a = anim.shift();
-        div.animate([{ opacity: 0 }, { transform: `translate(${a.x - x}px, ${a.y - y}px)`, opacity: 1, offset: 0.01 }],
-          { duration: 1500, fill: 'backwards', delay: a.d });
+  componentDidMount() {
+    this.componentDidUpdate();
+  }
+  componentDidUpdate(p) {
+    if (v.anim.length) {
+      const divs = document.querySelectorAll(`.${c.r.split(' ')[0]} .${mine}`), len = divs.length, d = p ? 5000 : 3200;
+      for (let i = len - v.anim.length; i < len; i++) {
+        const div = divs[i], { x, y } = div.getBoundingClientRect(), a = v.anim.pop(), w = a.x - x, h = a.y - y;
+        div.animate({ transform: `translate(${w}px, ${h}px)`, offset: 0 },
+          { duration: Math.hypot(w, h) / v.w * d, ...a.e && { easing: 'ease-in' } });
       }
     }
   }
@@ -82,209 +84,188 @@ class Settings extends PureComponent {
       <div><b className={c.numOply}>Number of Players:</b>
         {plyOpt.map(p => (<div key={p} className={c.slot}>
           <div className={tile + ' ' + obj[pnt].color} onClick={() => setPly(p)}>{p}
-            <div className={ply === p ? c.selectedPly : c.hidden}>&#9883;</div></div></div>))}
+            <div className={ply === p ? c.selectedPly : 'hidden'}>&#9883;</div></div></div>))}
       </div>
       <h4 className={c.prize}>winner takes {ply * pnt * obj[pnt].rate} points</h4></>);
   }
 }
-const err = new Audio(errorS), initNum = p => {
+const initNum = p => {
   const num = +localStorage.getItem(p), arr = Settings[p];
   return arr.includes(num) ? num : arr[0];
 }
-let socket, r, b, timer, int, tRS, me, pn, tilesRemain, players, anim = [], help, select, transfer;
+let v = {}, select, transfer;
 export default function Game() {
-  const [, render] = useState();
   const { playing, setPlaying } = useContext(Context);
-  const [sGLoad, setSGLoad] = useState();
-  const [load, setLoad] = useState();
-  const [leave, setLeave] = useState();
-  const [ended, setEnded] = useState();
-  const [ply, setPly] = useState(initNum('plyOpt'));
-  const [pnt, setPnt] = useState(initNum('pntOpt'));
+  const [ply, setPly] = useState(initNum('plyOpt')), [pnt, setPnt] = useState(initNum('pntOpt'));
+  const [load, setLoad] = useState(), [wait, setWait] = useState();
+  const [leave, setLeave] = useState(), [ended, setEnded] = useState();
+  const [pool, setPool] = useState(), [turn, setTurn] = useState();
+  const [alerr, setAlerr] = useState(), [, render] = useState();
   const endTurn = useCallback(() => {
-    if (int) {
-      int = clearInterval(int);
-      b = b.filter(t => delete t?.sel);
-      socket.emit('turnEnd', b, tRS, r.filter(t => t).length);
+    if (v.int) {
+      v.int = clearInterval(v.int);
+      v.b0 = v.b.forEach(t => delete t?.sel) || !v.b0;
+      v.socket.emit('turnEnd', v.b, v.tRS, v.r.filter(t => t).length, v.me);
       render(s => !s);
     }
   }, []);
   const goToSettings = useCallback(() => {
-    socket?.close();
-    setPlaying();
+    v.socket?.close();
+    v = setPlaying() || {};
   }, [setPlaying]);
   const startGame = useCallback(() => {
-    setSGLoad(true);//://localhost:5000
-    socket = socketIOClient("https://react-rummikub.herokuapp.com");
+    setLoad(true);//://localhost:5000
+    v.socket = socketIOClient("https://react-rummikub.herokuapp.com");
     const id = localStorage.getItem('id'), token = localStorage.getItem('token');
-    socket.emit("settings", id, token, ply, pnt);
+    v.socket.emit("settings", id, token, ply, pnt);
     localStorage.setItem('plyN', ply);
     localStorage.setItem('pntN', pnt);
-    socket.on('isRej', reason => {
-      setSGLoad();
+    v.socket.on('isRej', reason => {
+      setLoad();
       if (reason) {
         goToSettings();
-        setTimeout(alert, 10, reason);
+        setTimeout(alert, 99, reason);
       } else {
-        setLoad('Waiting for all Players');
-        setLeave('you can quit safely in ');
+        setWait(true);
+        setLeave(true);
         setEnded();
-        timer = 30;
-        help = pnt < 50;
-        int = setInterval(() => {
-          if (--timer === 0) {
-            setLeave(' ');
-            clearInterval(int);
-          }
-          render(s => !s);
-        }, 1000);
-        socket.once("setRack", rack => r = rack);
-        socket.on('boardChange', (board, willRen) => {
-          b = board;
+        v.timer = 30;
+        v.int = setInterval(() => --v.timer ? render(s => !s) : setLeave(clearInterval(v.int)), 1000);
+        v.socket.once("setup", (rack, i) => {
+          v.r = rack;
+          v.me = i;
+        });
+        v.socket.on('boardChange', (board, willRen) => {
+          v.b = board;
+          v.b0 = !v.b0;
           willRen || render(s => !s);
         });
-        socket.on('trim', len => {
-          r = r.filter(t => t);
-          len % 2 && r.push(undefined);
-        });
-        socket.once('sendRack', () => {
-          socket.emit('evalRack', r);
-          setLoad('Tiles ended! Checking who won');
-        });
-        socket.once('start', (plys, tileAmount) => {
-          int = clearInterval(int);
-          new Audio(startS).play();
-          players = plys;
-          me = players.findIndex(p => p.id === id);
-          setLoad();
-          setLeave();
-          localStorage.setItem('balance', players[me].balance - pnt);
-          const newTurn = (pnTurn, tileAmount) => {
-            pn = pnTurn;
-            tilesRemain = tileAmount;
-            if (pn === me) {
-              tRS = r.filter(t => t).length;
-              timer = 30;
-              int = setInterval(() => {
-                if (--timer === 0)
-                  endTurn();
-                render(s => !s);
-              }, 1000);
-            }
-            render(s => !s);
-          };
-          newTurn(0, tileAmount);
-          socket.on('newTurn', newTurn);
-        });
-        socket.once('gameEnd', (winner, prize) => {
-          if (id === winner) {
-            localStorage.setItem('balance', prize + +localStorage.getItem('balance'));
-            new Audio(winS).play();
-            setEnded('You WON');
-          } else {
-            new Audio(loseS).play();
-            setEnded('You lost');
+        v.socket.on('newTurn', (pNum, tileAmount) => {
+          if (pNum === v.me) {
+            v.tRS = v.r.filter(t => t).length;
+            v.timer = 30;
+            v.int = setInterval(() => --v.timer ? render(s => !s) : endTurn(), 1000);
           }
+          setTurn(pNum);
+          setPool(tileAmount);
         });
-        socket.on('tiles', tiles => {
-          const old = r.filter(t => t), len = tiles.length, newLen = len + old.length;
-          const empties = Array(newLen < 32 ? 32 - newLen : newLen % 2);
-          r = old.concat(tiles, ...empties);
-          const stacks = document.getElementsByClassName(c.s4), last = Math.ceil(tilesRemain / 4) - 1;
-          const addAnim = (div, d) => {
-            const { x, y } = div.getBoundingClientRect();
-            anim.unshift({ x, y, d });
-          };
-          if (stacks.length === last + 1)
-            if (len === 1)
-              addAnim(stacks[last], 0);
-            else {
-              const divs = document.querySelectorAll(`.${c.b.split(' ')[0]} .${mine}`);
-              if (divs.length === len - 2) {
-                divs.forEach(addAnim);
-                addAnim(stacks[last], 1000);
-                addAnim(stacks[tilesRemain % 4 === 1 ? last - 1 : last], 1500);
-              }
+        v.socket.once('start', (users, tileAmount) => {
+          v.int = clearInterval(v.int);
+          v.players = users;
+          setWait();
+          setPool(tileAmount);
+          v.help = pnt < 50;
+          localStorage.setItem('balance', users[v.me].balance - pnt);
+          const { offsetWidth, offsetHeight } = document.body;
+          v.w = offsetWidth;
+          v.anim = Array(14).fill({ x: v.w * .08, y: offsetHeight, e: true });
+          v.socket.on('tiles', tiles => {
+            const old = v.r.filter(t => t), len = tiles.length, newLen = len + old.length;
+            const empties = Array(newLen < 32 ? 32 - newLen : newLen % 2);
+            v.r = old.concat(tiles, ...empties);
+            v.r0 = !v.r0;
+            const stacks = document.getElementsByClassName(c.s4), last = stacks.length - 1;
+            if (last === -1)
+              return;
+            if (len > 1) {
+              const tOnB = document.querySelectorAll(`.${c.b.split(' ')[0]} .${mine}`);
+              if (tOnB.length !== len - 2)
+                return;
+              var addAnim = div => {
+                const { x, y } = div.getBoundingClientRect();
+                v.anim.unshift({ x, y });
+              };
+              tOnB.forEach(addAnim);
+              addAnim(stacks[last - (last && stacks[last].classList.contains(c.s1))]);
+              v.anim[0].e = true;
             }
+            addAnim(stacks[last]);
+          });
+          v.socket.on('trim', len => {
+            v.r = v.r.filter(t => t);
+            len % 2 && v.r.push(undefined);
+            v.r0 = !v.r0;
+          });
+          v.socket.once('sendRack', () => v.socket.emit('evalRack', v.r, v.me));
+          v.socket.once('gameEnd', (winner, prize, reason, status) => {
+            if (id === winner) {
+              localStorage.setItem('balance', prize + v.players[v.me].balance);
+              status = 'WON';
+            } else
+              status = 'lost';
+            setEnded({ status, reason });
+          });
         });
         setPlaying(true);
       }
     });
   }, [ply, pnt, endTurn, goToSettings, setPlaying]);
   useEffect(() => {
-    select = (p, i, arr = r) => {
-      if (p === 'b') {
-        if (!int)
-          return err.play();
-        arr = b;
-        b = b.slice();
+    const error = msg => v.help && setAlerr(msg);
+    select = (p, i) => {
+      if (p === 'r' || v.int) {
+        v[p][i].sel = !v[p][i].sel;
+        v[p + 0] = render(s => !s) || !v[p + 0];
       } else
-        r = r.slice();
-      arr[i].sel = !arr[i].sel;
-      render(s => !s);
+        error("You can't select tiles on the board when it isn't your turn");
     };
     transfer = (p, st) => {
       const getS = arr => arr.map((t, i) => t?.sel && i + '').filter(t => t);
-      const selB = getS(b), selR = getS(r), lB = selB.length, lR = selR.length, len = lB + lR;
+      const selB = getS(v.b), selR = getS(v.r), lB = selB.length, lR = selR.length, len = lB + lR;
       if (len) {
-        const toB = p === 'b', arr = toB ? b : r, en = st + len;
+        const toB = p === 'b', arr = v[p], en = st + len;
         if (en > arr.length)
-          return err.play();
+          return error("There aren't enough slots to transfer all selected tiles");
         for (let i = st; i < en; i++)
           if (arr[i] && !arr[i].sel)
-            return err.play();
+            return error("There aren't enough empty slots to transfer all selected tiles");
         if (toB) {
-          if (!int)
-            return err.play();
-        } else if (selB.some(i => b[i].board))
-          return err.play();
+          if (!v.int)
+            return error("You can't put tiles on the board when it isn't your turn");
+        } else if (selB.some(i => v.b[i].board))
+          return error("You can't put board tiles on the rack");
         const del = (s, old) => s.map(i => delete old[i].sel && old.splice(i, 1, undefined)[0]);
-        del(selB, b).concat(del(selR, r)).forEach(t => arr[st++] = t);
-        if (lB || toB) {
-          socket.volatile.emit('board', b);
-          b = b.slice();
-        }
+        del(selB, v.b).concat(del(selR, v.r)).forEach(t => arr[st++] = t);
+        if (lB || toB)
+          v.b0 = v.socket.volatile.emit('board', v.b) && !v.b0;
         if (lR || !toB)
-          r = r.slice();
+          v.r0 = !v.r0;
         render(s => !s)
       }
     };
     return goToSettings
   }, [goToSettings]);
   const groupSort = useCallback(() => {
-    const tiles = r.filter(t => t).sort((a, b) => a.num === 'J' ? 1 : b.num === 'J' ? -1 : a.num - b.num);
-    r = tiles.concat(...Array(r.length - tiles.length));
-    render(s => !s);
+    const tiles = v.r.filter(t => t).sort((a, b) => a.num === 'J' ? 1 : b.num === 'J' ? -1 : a.num - b.num);
+    v.r = tiles.concat(...Array(v.r.length - tiles.length));
+    v.r0 = render(s => !s) || !v.r0;
   }, []);
   const runSort = useCallback(() => {
-    const sorted = [], colors = { 'black': [], 'orange': [], 'blue': [], 'red': [], 'joker': [] };
-    r.forEach(t => t && colors[t.color].push(t));
+    const sorted = [], colors = { black: [], orange: [], blue: [], red: [], joker: [] };
+    v.r.forEach(t => t && colors[t.color].push(t));
     Object.values(colors).forEach(c => sorted.push(...c.sort((a, b) => a.num - b.num)));
-    r = sorted.concat(...Array(r.length - sorted.length));
-    render(s => !s);
+    v.r = sorted.concat(...Array(v.r.length - sorted.length));
+    v.r0 = render(s => !s) || !v.r0;
   }, []);
 
   return (playing ? ended ? (<div className={c.ended}>
-    {ended}<br /><br /><Button variant="info" onClick={goToSettings}>play again</Button>
-  </div>) : load ? (<div className={c.load}>
-    <Spinner />{load}...<br /><br />{leave && (leave !== ' ' ? `${leave}${timer}`
-      : <Button variant="danger" onClick={() => socket.emit('leave')}>leave now</Button>)}
+    <b className={c[ended.status]}>You {ended.status}</b>{ended.reason}<br />
+    <Button variant="info" onClick={goToSettings}>return</Button>
+  </div>) : wait ? (<div className={c.wait}>
+    <Spinner />Waiting for all Players...<br /><br />{leave ? 'you can quit safely in ' + v.timer
+      : <Button variant="danger" onClick={() => v.timer++ || v.socket.emit('leave')}>leave now</Button>}
   </div>) : (<div className={game}>
-    <Pool size={tilesRemain} />
-    <Board arr={b} /><Rack arr={r} />
-    <Players pn={pn} />
-    {int && (<>
-      <div className={`${c.timer} ${timer < 10 ? c.red : joker}`}>You have {timer} seconds</div>
-      <div className={c.finish} onClick={endTurn}>Finish Turn</div>
-    </>)}
-    {help && (<>
-      <div className={runS} onClick={runSort}>Sort to Runs</div>
+    <Players turn={turn} />
+    <Board render={v.b0} />
+    {v.help && (<><Rules />
+      {alerr && <div className={c.alerr} onClick={() => setAlerr()}>{alerr}</div>}
       <div className={groupS} onClick={groupSort}>Sort to Groups</div>
-      <Rules />
-    </>)}
-  </div>) : (<div>
-    <h3>Choose Game Settings</h3>
+      <div className={runS} onClick={runSort}>Sort to Runs</div></>)}
+    <Pool size={pool} /><Rack render={v.r0} />
+    {v.int && (<><div className={c.finish} onClick={endTurn}>Finish Turn</div>
+      <div className={`${c.timer} ${v.timer < 10 ? c.red : joker}`}>You have {v.timer} seconds</div></>)}
+  </div>) : (<div><h3>Choose Game Settings</h3>
     <Settings ply={ply} pnt={pnt} setPnt={setPnt} setPly={setPly} />
-    {sGLoad ? <Spinner /> : <Button variant="success" onClick={startGame}>Start Game</Button>}
+    {load ? <Spinner /> : <Button variant="success" onClick={startGame}>Start Game</Button>}
   </div>));
 }
