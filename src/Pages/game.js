@@ -117,8 +117,8 @@ export default function Game() {
     v.socket = socketIOClient("https://react-rummikub.herokuapp.com");
     const id = localStorage.getItem('id'), token = localStorage.getItem('token');
     v.socket.emit("settings", id, token, ply, pnt);
-    localStorage.setItem('plyN', ply);
-    localStorage.setItem('pntN', pnt);
+    localStorage.setItem('plyOpt', ply);
+    localStorage.setItem('pntOpt', pnt);
     v.socket.on('isRej', reason => batch(() => {
       if (reason) {
         goToSettings();
@@ -165,14 +165,14 @@ export default function Game() {
             const stacks = document.getElementsByClassName(c.s4), last = stacks.length - 1;
             if (last < 0)
               return;
+            const addAnim = div => {
+              const { x, y } = div.getBoundingClientRect();
+              v.anim.unshift({ x, y });
+            };
             if (len > 1) {
               const tOnB = document.querySelectorAll(`.${c.b.split(' ')[0]} .${mine}`);
               if (tOnB.length !== len - 2)
                 return;
-              var addAnim = div => {
-                const { x, y } = div.getBoundingClientRect();
-                v.anim.unshift({ x, y });
-              };
               tOnB.forEach(addAnim);
               addAnim(stacks[last - (v.pool % 4 === 1 && last > 0)]);
               v.anim[0].e = true;
