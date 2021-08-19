@@ -152,7 +152,7 @@ export default function Game() {
           v.players = users;
           v.pool = tileAmount;
           v.help = pnt < 50;
-          localStorage.setItem('balance', users[v.me].balance - pnt);
+          localStorage.setItem('balance', users[v.me].balance);
           const { offsetWidth, offsetHeight } = document.body;
           v.w = offsetWidth;
           v.anim = Array(14).fill({ x: v.w * .08, y: offsetHeight, e: true });
