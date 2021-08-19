@@ -24,7 +24,7 @@ export default function Login() {
                 localStorage.setItem('active', data.active || '');
                 setTimeout(alert, 99, 'you are logged in');
                 history.replace('/');
-                return render(s => !s);
+                return render();
             } else
                 setTimeout(alert, 99, data);
         } catch (e) {

@@ -16,7 +16,7 @@ export default function ChangeUsername() {
                 .then(({ data }) => {
                     if (data[0] === 'U') {
                         localStorage.setItem('username', username);
-                        render(s => !s);
+                        render();
                     }
                     setTimeout(alert, 99, data);
                 })

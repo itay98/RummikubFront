@@ -1,6 +1,7 @@
 import socketIOClient from "socket.io-client";
 import Button from 'react-bootstrap/Button';
-import { useState, useCallback, useEffect, PureComponent, useContext } from 'react';
+import { useState, useCallback, useEffect, PureComponent, useContext, useReducer } from 'react';
+import { unstable_batchedUpdates as batch } from "react-dom";
 import { Context } from "../App";
 import Spinner from "../Components/spinner";
 import { GRPOT } from "../Components/popover";
@@ -95,24 +96,22 @@ const initNum = p => {
 }
 let v = {}, select, transfer;
 export default function Game() {
-  const { playing, setPlaying } = useContext(Context);
+  const { playing, setPlaying } = useContext(Context), [, render] = useReducer(s => !s);
   const [ply, setPly] = useState(initNum('plyOpt')), [pnt, setPnt] = useState(initNum('pntOpt'));
-  const [load, setLoad] = useState(), [wait, setWait] = useState(1);
+  const [load, setLoad] = useState(), [wait, setWait] = useState();
   const [leave, setLeave] = useState(), [ended, setEnded] = useState();
-  const [pool, setPool] = useState(), [turn, setTurn] = useState();
-  const [alerr, setAlerr] = useState(), [, render] = useState();
-  const endTurn = useCallback(() => {
-    if (v.int) {
-      v.int = clearInterval(v.int);
-      v.b0 = v.b.forEach(t => delete t?.sel) || !v.b0;
-      v.socket.emit('turnEnd', v.b, v.tRS, v.r.filter(t => t).length, v.me);
-      render(s => !s);
-    }
-  }, []);
+  const [alerr, setAlerr] = useState(), [turn, setTurn] = useState();
   const goToSettings = useCallback(() => {
     v.socket?.close();
-    v = setPlaying() || {};
+    v = setPlaying(setLoad()) || {};
   }, [setPlaying]);
+  const endTurn = useCallback(() => {
+    if (v.int) {
+      v.int = clearInterval(v.int) || render();
+      v.b0 = v.b.forEach(t => delete t?.sel) || !v.b0;
+      v.socket.emit('turnEnd', v.b, v.tRS, v.r.filter(t => t).length, v.me);
+    }
+  }, []);
   const startGame = useCallback(() => {
     setLoad(true);//://localhost:5000
     v.socket = socketIOClient("https://react-rummikub.herokuapp.com");
@@ -120,17 +119,16 @@ export default function Game() {
     v.socket.emit("settings", id, token, ply, pnt);
     localStorage.setItem('plyN', ply);
     localStorage.setItem('pntN', pnt);
-    v.socket.on('isRej', reason => {
-      setLoad();
+    v.socket.on('isRej', reason => batch(() => {
       if (reason) {
         goToSettings();
         setTimeout(alert, 99, reason);
       } else {
+        v.timer = 30;
+        v.int = setInterval(() => --v.timer ? render() : setLeave(clearInterval(v.int)), 1000);
         setWait(true);
         setLeave(true);
-        setEnded();
-        v.timer = 30;
-        v.int = setInterval(() => --v.timer ? render(s => !s) : setLeave(clearInterval(v.int)), 1000);
+        setEnded(setPlaying(true));
         v.socket.once("setup", (rack, i) => {
           v.r = rack;
           v.me = i;
@@ -138,34 +136,34 @@ export default function Game() {
         v.socket.on('boardChange', (board, willRen) => {
           v.b = board;
           v.b0 = !v.b0;
-          willRen || render(s => !s);
+          willRen || render();
         });
         v.socket.on('newTurn', (pNum, tileAmount) => {
           if (pNum === v.me) {
             v.tRS = v.r.filter(t => t).length;
             v.timer = 30;
-            v.int = setInterval(() => --v.timer ? render(s => !s) : endTurn(), 1000);
+            v.int = setInterval(() => --v.timer ? render() : endTurn(), 1000);
           }
+          v.pool = tileAmount;
           setTurn(pNum);
-          setPool(tileAmount);
         });
         v.socket.once('start', (users, tileAmount) => {
           v.int = clearInterval(v.int);
           v.players = users;
-          setWait();
-          setPool(tileAmount);
+          v.pool = tileAmount;
           v.help = pnt < 50;
           localStorage.setItem('balance', users[v.me].balance - pnt);
           const { offsetWidth, offsetHeight } = document.body;
           v.w = offsetWidth;
           v.anim = Array(14).fill({ x: v.w * .08, y: offsetHeight, e: true });
+          setWait();
           v.socket.on('tiles', tiles => {
             const old = v.r.filter(t => t), len = tiles.length, newLen = len + old.length;
             const empties = Array(newLen < 32 ? 32 - newLen : newLen % 2);
             v.r = old.concat(tiles, ...empties);
             v.r0 = !v.r0;
             const stacks = document.getElementsByClassName(c.s4), last = stacks.length - 1;
-            if (last === -1)
+            if (last < 0)
               return;
             if (len > 1) {
               const tOnB = document.querySelectorAll(`.${c.b.split(' ')[0]} .${mine}`);
@@ -176,7 +174,7 @@ export default function Game() {
                 v.anim.unshift({ x, y });
               };
               tOnB.forEach(addAnim);
-              addAnim(stacks[last - (last && stacks[last].classList.contains(c.s1))]);
+              addAnim(stacks[last - (v.pool % 4 === 1 && last > 0)]);
               v.anim[0].e = true;
             }
             addAnim(stacks[last]);
@@ -196,16 +194,15 @@ export default function Game() {
             setEnded({ status, reason });
           });
         });
-        setPlaying(true);
       }
-    });
+    }));
   }, [ply, pnt, endTurn, goToSettings, setPlaying]);
   useEffect(() => {
     const error = msg => v.help && setAlerr(msg);
     select = (p, i) => {
       if (p === 'r' || v.int) {
         v[p][i].sel = !v[p][i].sel;
-        v[p + 0] = render(s => !s) || !v[p + 0];
+        v[p + 0] = render() || !v[p + 0];
       } else
         error("You can't select tiles on the board when it isn't your turn");
     };
@@ -230,7 +227,7 @@ export default function Game() {
           v.b0 = v.socket.volatile.emit('board', v.b) && !v.b0;
         if (lR || !toB)
           v.r0 = !v.r0;
-        render(s => !s)
+        render();
       }
     };
     return goToSettings
@@ -238,14 +235,14 @@ export default function Game() {
   const groupSort = useCallback(() => {
     const tiles = v.r.filter(t => t).sort((a, b) => a.num === 'J' ? 1 : b.num === 'J' ? -1 : a.num - b.num);
     v.r = tiles.concat(...Array(v.r.length - tiles.length));
-    v.r0 = render(s => !s) || !v.r0;
+    v.r0 = render() || !v.r0;
   }, []);
   const runSort = useCallback(() => {
     const sorted = [], colors = { black: [], orange: [], blue: [], red: [], joker: [] };
     v.r.forEach(t => t && colors[t.color].push(t));
     Object.values(colors).forEach(c => sorted.push(...c.sort((a, b) => a.num - b.num)));
     v.r = sorted.concat(...Array(v.r.length - sorted.length));
-    v.r0 = render(s => !s) || !v.r0;
+    v.r0 = render() || !v.r0;
   }, []);
 
   return (playing ? ended ? (<div className={c.ended}>
@@ -261,7 +258,7 @@ export default function Game() {
       {alerr && <div className={c.alerr} onClick={() => setAlerr()}>{alerr}</div>}
       <div className={groupS} onClick={groupSort}>Sort to Groups</div>
       <div className={runS} onClick={runSort}>Sort to Runs</div></>)}
-    <Pool size={pool} /><Rack render={v.r0} />
+    <Pool size={v.pool} /><Rack render={v.r0} />
     {v.int && (<><div className={c.finish} onClick={endTurn}>Finish Turn</div>
       <div className={`${c.timer} ${v.timer < 10 ? c.red : joker}`}>You have {v.timer} seconds</div></>)}
   </div>) : (<div><h3>Choose Game Settings</h3>

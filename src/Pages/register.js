@@ -41,7 +41,7 @@ export default function Register() {
                     localStorage.setItem('active', '');
                     history.replace('/');
                     setTimeout(alert, 99, 'you successfully registered! Go to your email to activate your account');
-                    render(s => !s);
+                    render();
                 })
                 .catch(e => { console.log(e); setLoad(); setTimeout(alert, 99, 'error registering') });
         }

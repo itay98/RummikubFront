@@ -22,7 +22,7 @@ export default function Buy() {
                 setTimeout(alert, 99, data);
                 localStorage.removeItem('token');
                 history.replace('/login');
-                render(s => !s);
+                render();
             } else if (data)
                 setLoad();
             else
@@ -45,7 +45,7 @@ export default function Buy() {
                 const { data } = await axios.post('/users/addPoints', { id, points });
                 setTimeout(alert, 99, `you successfully purchased ${points} points`);
                 localStorage.setItem('balance', data);
-                render(s => !s);
+                render();
             } catch (e) {
                 console.log(e); alert('error adding points...contact us')
             }

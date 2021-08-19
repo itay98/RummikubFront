@@ -16,7 +16,7 @@ export default function Menu() {
   const logout = useCallback(() => {
     if (window.confirm('are you sure you want to logout?')) {
       localStorage.removeItem('token');
-      render(s => !s);
+      render();
     }
   }, [render]);
   const togTheme = useCallback(() => {
