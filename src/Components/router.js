@@ -1,27 +1,25 @@
-import { lazy, Suspense, useContext } from "react";
+import { useContext } from "react";
 import { Switch, Route } from "react-router-dom";
-import Spinner from "./spinner";
 import { Context } from "../App";
-const Login = lazy(() => import('../Pages/login'));
-const Register = lazy(() => import('../Pages/register'));
-const NotFound = lazy(() => import('../Pages/notFound'));
-const Home = lazy(() => import('../Pages/home'));
-const Rules = lazy(() => import('../Pages/rules'));
-const Contact = lazy(() => import('../Pages/contact'));
-const Game = lazy(() => import('../Pages/game'));
-const Buy = lazy(() => import('../Pages/buyPoints'));
-const Records = lazy(() => import('../Pages/records'));
-const Activate = lazy(() => import('../Pages/activate'));
-const ChangePassword = lazy(() => import('../Pages/changePassword'));
-const ChangeAvatar = lazy(() => import('../Pages/changeAvatar'));
-const ChangeUsername = lazy(() => import('../Pages/changeUsername'));
-const ChangeEmail = lazy(() => import('../Pages/changeEmail'));
-const TopWinnings = lazy(() => import('../Pages/topWinnings'));
-const TopBalance = lazy(() => import('../Pages/topBalance'));
+import Login from '../Pages/login';
+import Register from '../Pages/register';
+import NotFound from '../Pages/notFound';
+import Home from '../Pages/home';
+import Rules from '../Pages/rules';
+import Contact from '../Pages/contact';
+import Game from '../Pages/game';
+import Buy from '../Pages/buyPoints';
+import Records from '../Pages/records';
+import Activate from '../Pages/activate';
+import ChangePassword from '../Pages/changePassword';
+import ChangeAvatar from '../Pages/changeAvatar';
+import ChangeUsername from '../Pages/changeUsername';
+import ChangeEmail from '../Pages/changeEmail';
+import TopWinnings from '../Pages/topWinnings';
+import TopBalance from '../Pages/topBalance';
 export default function Container() {
   const { playing } = useContext(Context);
   return (<div className={playing ? '' : "container mt-3"}>
-    <Suspense fallback={<Spinner />}>
       <Switch>
         <Route exact path="/" component={Home} />
         <Route exact path="/rules" component={Rules} />
@@ -43,6 +41,6 @@ export default function Container() {
           <Route exact path="/login" component={Login} />
           <Route component={NotFound} />
         </Switch>}
-      </Switch></Suspense>
+      </Switch>
   </div>)
 }

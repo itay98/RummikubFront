@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import axios from "../axios";
 import Button from 'react-bootstrap/Button';
 import { Password } from "../Components/textFields";
@@ -18,7 +18,7 @@ const getCred = () => {
 export default function ChangePassword() {
     const [password, setPassword] = useState(""), [pwV, setPwV] = useState();
     const [rePassword, setRePassword] = useState(""), [rPwV, setRPwV] = useState();
-    const cred = useRef(getCred());
+    const [cred] = useState(getCred());
     const submit = () => {
         let errTxt = '';
         if (!password || pwV)
@@ -28,7 +28,7 @@ export default function ChangePassword() {
         if (errTxt)
             alert(errTxt);
         else
-            axios.put('/users/resetPass', { ...cred.current, password })
+            axios.put('/users/resetPass', { ...cred, password })
                 .then(({ data }) => alert(data))
                 .catch(e => { console.log(e); alert('error with reseting password') });
     }

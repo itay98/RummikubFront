@@ -107,9 +107,9 @@ export default function Game() {
   }, [setPlaying]);
   const endTurn = useCallback(() => {
     if (v.int) {
-      v.int = clearInterval(v.int) || render();
+      v.int = clearInterval(v.int);
       v.b0 = v.b.forEach(t => delete t?.sel) || !v.b0;
-      v.socket.emit('turnEnd', v.b, v.tRS, v.r.filter(t => t).length, v.me);
+      v.socket.emit('turnEnd', v.b, v.tRS, v.r.filter(t => t).length, v.me) && render();
     }
   }, []);
   const startGame = useCallback(() => {
